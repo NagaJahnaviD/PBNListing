@@ -1,0 +1,67 @@
+#### Blog
+### Create a new blog
+POST http://localhost:3000/blog/blog
+Content-Type: application/json
+
+{
+  "blogId": 2,
+  "blogTitle": "Second Blog",
+  "blogDate": "2025-08-21T00:00:00.000Z",
+  "blogDescription": "This is the second blog post.",
+  "blogAuthor": "Admin"
+}
+
+### Edit a blog
+PUT http://localhost:3000/blog/blog
+Content-Type: application/json
+
+{
+  "blogId": 1,
+  "blogTitle": "First Blog (Edited)",
+  "blogDescription": "Updated description."
+}
+
+### Delete a blog
+DELETE http://localhost:3000/blog/blog
+Content-Type: application/json
+
+{
+  "blogId": 1
+}
+### Get all blogs
+GET http://localhost:3000/blog/blogs
+
+
+
+### Banner
+### Create a new banner
+POST http://localhost:3000/banner/banner
+Content-Type: application/json
+
+{
+  "bannerId": 1,
+  "bannerTitle": "Welcome Banner",
+  "bannerVisibility": true,
+  "bannerContent": "Welcome to our site!",
+  "bannerImage": "banner1.jpg",
+  "bannerLink": "https://example.com"
+}
+
+### Get all banners
+GET http://localhost:3000/banner/banners
+
+### Get a single banner by bannerId
+GET http://localhost:3000/banner/banner/1
+
+### Edit a banner by bannerId
+PUT http://localhost:3000/banner/banner/1
+Content-Type: application/json
+
+{
+  "bannerTitle": "Updated Welcome Banner",
+  "bannerContent": "Welcome to our updated site!",
+  "bannerVisibility": false
+}
+
+### Delete a banner by bannerId
+DELETE http://localhost:3000/banner/banner/1
