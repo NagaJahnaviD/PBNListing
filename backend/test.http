@@ -65,3 +65,411 @@ Content-Type: application/json
 
 ### Delete a banner by bannerId
 DELETE http://localhost:3000/banner/banner/1
+
+
+#### Block
+### Create a new block
+POST http://localhost:3000/block/block
+Content-Type: application/json
+
+{
+  "blockId": 1,
+  "blockTitle": "Block Title",
+  "blockSubtitle": "Block Subtitle",
+  "blockVisibility": true,
+  "blockContent": "Block content here.",
+  "blockImage": "block1.jpg",
+  "blockLink": "https://example.com/block",
+  "status": "A",
+  "createdBy": 101,
+  "updatedBy": 101
+}
+
+### Get all blocks
+GET http://localhost:3000/block/blocks
+
+### Get a single block by blockId
+GET http://localhost:3000/block/block/1
+
+### Edit a block by blockId
+PUT http://localhost:3000/block/block/1
+Content-Type: application/json
+
+{
+  "blockTitle": "Updated Block Title",
+  "blockSubtitle": "Updated Subtitle",
+  "blockContent": "Updated block content.",
+  "blockVisibility": false,
+  "blockImage": "block1_updated.jpg",
+  "blockLink": "https://example.com/block-updated",
+  "status": "A",
+  "updatedBy": 102
+}
+
+### Delete a block by blockId
+DELETE http://localhost:3000/block/block/1
+
+
+#### User
+### Create a new user
+POST http://localhost:3000/user/user
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "userName": "John Doe",
+  "userEmail": "john@example.com",
+  "userPassword": "password123",
+  "userRole": "admin"
+}
+
+### Get all users
+GET http://localhost:3000/user/users
+
+### Get a single user by userId
+GET http://localhost:3000/user/user/1
+
+### Edit a user by userId
+PUT http://localhost:3000/user/user/1
+Content-Type: application/json
+
+{
+  "userName": "John Doe Updated",
+  "userEmail": "john.updated@example.com",
+  "userRole": "editor"
+}
+
+### Delete a user by userId
+DELETE http://localhost:3000/user/user/1
+
+
+#### Client
+### Create a new client
+POST http://localhost:3000/client/client
+Content-Type: application/json
+
+{
+  "clientId": 1,
+  "clientName": "Acme Corp",
+  "clientEmail": "contact@acme.com",
+  "clientPhone": "1234567890",
+  "clientAddress": "123 Main St, City",
+  "clientStatus": "A"
+}
+
+### Get all clients
+GET http://localhost:3000/client/clients
+
+### Get a single client by clientId
+GET http://localhost:3000/client/client/1
+
+### Edit a client by clientId
+PUT http://localhost:3000/client/client/1
+Content-Type: application/json
+
+{
+  "clientName": "Acme Corp Updated",
+  "clientEmail": "newcontact@acme.com",
+  "clientPhone": "0987654321",
+  "clientAddress": "456 New St, City",
+  "clientStatus": "A"
+}
+
+### Delete a client by clientId
+DELETE http://localhost:3000/client/client/1
+
+#### Configuration
+### Create a new configuration
+POST http://localhost:3000/configuration/configuration
+Content-Type: application/json
+
+{
+  "configId": 1,
+  "websiteTitle": "My Website",
+  "homePageTitle": "Welcome Home",
+  "headerLogo": "header.png",
+  "footerLogo": "footer.png",
+  "bannerCaptionName": "Best Site",
+  "bannerCaptionLink": "https://example.com/banner",
+  "googleAnalytics": "UA-XXXXX-Y",
+  "websiteContactNumber": "1234567890",
+  "websiteMobileNumber": "0987654321",
+  "websiteAddress": "123 Main St, City",
+  "websiteFaxNumber": "111222333",
+  "websiteEmail": "info@example.com",
+  "messageName": "Contact Us",
+  "informationName": "Info",
+  "footerText": "© 2025 My Website",
+  "quickLinks": ["Home", "About", "Contact"],
+  "ourServices": "Web Development",
+  "technologies": "Node.js, React",
+  "usaAddress": "456 USA St, NY",
+  "headerAddress": "Header Address",
+  "workingOur": "Mon-Fri 9am-5pm",
+  "signallingLinks": ["Link1", "Link2"],
+  "footerContact": "Footer Contact",
+  "indianContactDetails": "India Address",
+  "googleMapEmbeded": "<iframe></iframe>",
+  "footerCopyRight": "All rights reserved.",
+  "teitterLink": "https://twitter.com/example",
+  "instagramLink": "https://instagram.com/example",
+  "facebookLink": "https://facebook.com/example",
+  "linkedinLink": "https://linkedin.com/example",
+  "youTubeLink": "https://youtube.com/example",
+  "underConstruction": false,
+  "adminPanelConstruction": false,
+  "metaDescription": "Best website ever.",
+  "metaKeywords": "website, best, example",
+  "status": "A",
+  "createdBy": 1,
+  "updatedBy": 1
+}
+
+### Get all configurations
+GET http://localhost:3000/configuration/configurations
+
+### Get a single configuration by configId
+GET http://localhost:3000/configuration/configuration/1
+
+### Edit a configuration by configId
+PUT http://localhost:3000/configuration/configuration/1
+Content-Type: application/json
+
+{
+  "websiteTitle": "My Website Updated",
+  "footerText": "© 2025 My Website Updated",
+  "quickLinks": ["Home", "Services", "Contact"],
+  "updatedBy": 2
+}
+
+### Delete a configuration by configId
+DELETE http://localhost:3000/configuration/configuration/1
+
+### Get latest configuration
+GET http://localhost:3000/configuration/latest-configuration
+
+#### Event
+### Create a new event
+POST http://localhost:3000/event/event
+Content-Type: application/json
+
+{
+  "eventId": 1,
+  "eventTitle": "Annual Meetup",
+  "eventDate": "2025-09-15T10:00:00.000Z",
+  "eventDescription": "Join us for our annual meetup.",
+  "eventLocation": "Conference Hall, City",
+  "eventStatus": "A"
+}
+
+### Get all events
+GET http://localhost:3000/event/events
+
+### Get a single event by eventId
+GET http://localhost:3000/event/event/1
+
+### Edit an event by eventId
+PUT http://localhost:3000/event/event/1
+Content-Type: application/json
+
+{
+  "eventTitle": "Annual Meetup Updated",
+  "eventDescription": "Updated description for the annual meetup.",
+  "eventLocation": "Main Auditorium, City",
+  "eventStatus": "A"
+}
+
+### Delete an event by eventId
+DELETE http://localhost:3000/event/event/1
+
+#### Current Opening
+### Create a new current opening
+POST http://localhost:3000/currentOpening/currentOpening
+Content-Type: application/json
+
+{
+  "openingId": 1,
+  "openingTitle": "Software Engineer",
+  "openingDescription": "Develop and maintain software applications.",
+  "openingLocation": "Remote",
+  "openingStatus": "Open"
+}
+
+### Get all current openings
+GET http://localhost:3000/currentOpening/currentOpenings
+
+### Get a single current opening by openingId
+GET http://localhost:3000/currentOpening/currentOpening/1
+
+### Edit a current opening by openingId
+PUT http://localhost:3000/currentOpening/currentOpening/1
+Content-Type: application/json
+
+{
+  "openingTitle": "Senior Software Engineer",
+  "openingDescription": "Lead development teams and maintain applications.",
+  "openingLocation": "Onsite",
+  "openingStatus": "Open"
+}
+
+### Delete a current opening by openingId
+DELETE http://localhost:3000/currentOpening/currentOpening/1
+
+#### Listing
+### Create a new listing
+POST http://localhost:3000/listing/listing
+Content-Type: application/json
+
+{
+  "listingId": 1,
+  "listingTitle": "Premium Listing",
+  "listingDescription": "This is a premium listing.",
+  "listingCategory": "Business",
+  "listingStatus": "Active"
+}
+
+### Get all listings
+GET http://localhost:3000/listing/listings
+
+### Get a single listing by listingId
+GET http://localhost:3000/listing/listing/1
+
+### Edit a listing by listingId
+PUT http://localhost:3000/listing/listing/1
+Content-Type: application/json
+
+{
+  "listingTitle": "Premium Listing Updated",
+  "listingDescription": "Updated description for the premium listing.",
+  "listingCategory": "Business",
+  "listingStatus": "Active"
+}
+
+### Delete a listing by listingId
+DELETE http://localhost:3000/listing/listing/1
+
+#### Subscribed Email
+### Create a new subscribed email
+POST http://localhost:3000/subscribedEmail/subscribedEmail
+Content-Type: application/json
+
+{
+  "emailId": "hello@123",
+  "emailAddress": "user@example.com",
+  "subscribedOn": "2025-08-26T10:00:00.000Z",
+
+}
+
+### Get all subscribed emails
+GET http://localhost:3000/subscribedEmail/subscribedEmails
+
+### Get a single subscribed email by emailId
+GET http://localhost:3000/subscribedEmail/subscribedEmail/1
+
+### Edit a subscribed email by emailId
+PUT http://localhost:3000/subscribedEmail/subscribedEmail/1
+Content-Type: application/json
+
+{
+  "emailAddress": "updateduser@example.com",
+}
+
+### Delete a subscribed email by emailId
+DELETE http://localhost:3000/subscribedEmail/subscribedEmail/1
+
+
+#### Menu
+### Create a new menu
+POST http://localhost:3000/menu/menu
+Content-Type: application/json
+
+{
+  "menuId": 1,
+  "menuTitle": "Home",
+  "menuLink": "/home",
+  "menuOrder": 1,
+  "menuStatus": "Active"
+}
+
+### Get all menus
+GET http://localhost:3000/menu/menus
+
+### Get a single menu by menuId
+GET http://localhost:3000/menu/menu/1
+
+### Edit a menu by menuId
+PUT http://localhost:3000/menu/menu/1
+Content-Type: application/json
+
+{
+  "menuTitle": "Homepage",
+  "menuLink": "/homepage",
+  "menuOrder": 1,
+  "menuStatus": "Active"
+}
+
+### Delete a menu by menuId
+DELETE http://localhost:3000/menu/menu/1
+
+#### Page
+### Create a new page
+POST http://localhost:3000/page/page
+Content-Type: application/json
+
+{
+  "pageId": 1,
+  "pageTitle": "About Us",
+  "pageContent": "This is the About Us page.",
+  "pageStatus": "Active"
+}
+
+### Get all pages
+GET http://localhost:3000/page/pages
+
+### Get a single page by pageId
+GET http://localhost:3000/page/page/1
+
+### Edit a page by pageId
+PUT http://localhost:3000/page/page/1
+Content-Type: application/json
+
+{
+  "pageTitle": "About Us Updated",
+  "pageContent": "Updated content for About Us page.",
+  "pageStatus": "Active"
+}
+
+### Delete a page by pageId
+DELETE http://localhost:3000/page/page/1
+
+
+#### Product
+### Create a new product
+POST http://localhost:3000/page/page
+Content-Type: application/json
+
+{
+  "pageId": 1,
+  "pageTitle": "Product One",
+  "pageContent": "Description of Product One.",
+  "pageStatus": "Active"
+}
+
+### Get all products
+GET http://localhost:3000/page/pages
+
+### Get a single product by pageId
+GET http://localhost:3000/page/page/1
+
+### Edit a product by pageId
+PUT http://localhost:3000/page/page/1
+Content-Type: application/json
+
+{
+  "pageTitle": "Product One Updated",
+  "pageContent": "Updated description for Product One.",
+  "pageStatus": "Active"
+}
+
+### Delete a product by pageId
+DELETE http://localhost:3000/page/page/1

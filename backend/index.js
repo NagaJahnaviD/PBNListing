@@ -16,13 +16,54 @@ mongoose.connect(process.env.DBURL)
 app.use(exp.json())
 
 //importing Apis
-//blog
-const blogApp = require("./APIs/blogApi");
-app.use('/blog',blogApp)
+//banner api
+const bannerApp=require("./APIs/bannerApi")
+app.use("/banner",bannerApp)
 
-//banner
-const bannerApp = require("./APIs/bannerApi");
-app.use('/banner',bannerApp)
+//blog api
+const blogApp=require("./APIs/blogApi")
+app.use("/blog",blogApp)
+
+//client api
+const clientApp=require("./APIs/clientApi")
+app.use("/client",clientApp)
+
+//configuration api
+const configurationApp=require("./APIs/configurationApi")
+app.use("/configuration",configurationApp)
+
+//currentOpenings api
+const currentOpeningsApp=require("./APIs/currentOpeningsApi")
+app.use("/currentOpenings",currentOpeningsApp)
+
+//event api
+const eventApp=require("./APIs/eventApi")
+app.use("/event",eventApp)
+
+//list api
+const listingApp=require("./APIs/listingApi")
+app.use("/listing",listingApp)
+
+//menu api
+const menuApp=require("./APIs/menuApi")
+app.use("/menu",menuApp)
+
+//pages api
+const pagesApp=require("./APIs/pagesApi")
+app.use("/pages",pagesApp)
+
+//product api
+const productApp=require("./APIs/productApi")
+app.use("/product",productApp)
+
+//subscribedEmails api
+const subscribedEmailApp=require("./APIs/subscribedEmailApi")
+app.use("/subscribedEmails",subscribedEmailApp)
+
+//user api
+const userApp=require("./APIs/userApi")
+app.use("/user",userApp)
+
 
 //error handler middleware
 
