@@ -24,13 +24,17 @@ app.use("/banner",bannerApp)
 const blogApp=require("./APIs/blogApi")
 app.use("/blog",blogApp)
 
+//block api
+const blockApp=require("./APIs/blockApi")
+app.use("/block",blockApp)
+
 //client api
 const clientApp=require("./APIs/clientApi")
 app.use("/client",clientApp)
 
 //configuration api
-const configurationApp=require("./APIs/configurationApi")
-app.use("/configuration",configurationApp)
+// const configurationApp=require("./APIs/configurationApi")
+// app.use("/configuration",configurationApp)
 
 //currentOpenings api
 const currentOpeningsApp=require("./APIs/currentOpeningsApi")
