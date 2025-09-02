@@ -1,11 +1,12 @@
+import React from 'react'
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 
-function Index() {
-  const [pages, setPages] = useState([]);
-  const [editPage, setEditPage] = useState(false);
-  const [editPageId, setEditPageId] = useState(null);
+function BlockManagement() {
+    const [blocks, setBlocks] = useState([]);
+  const [editBlock, setEditBlock] = useState(false);
+  const [editBlockId, setEditBlockId] = useState(null);
 
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -17,91 +18,87 @@ function Index() {
     formState: { errors },
   } = useForm();
 
-  // fetch all pages
+  // fetch all blocks
   useEffect(() => {
     axios
-      .get(`${apiBase}/page/pages`)
-      .then((res) => setPages(res.data.payload || []))
+      .get(`${apiBase}/block/blocks`)
+      .then((res) => setBlocks(res.data.payload || []))
       .catch((err) => console.error(err));
   }, []);
 
   // handle edit click
-  const handleEdit = (pageId) => {
-    setEditPage(true);
-    setEditPageId(pageId);
+  const handleEdit = (blockId) => {
+    setEditBlock(true);
+    setEditBlockId(blockId);
 
-    const pageToEdit = pages.find((p) => p.pageId === pageId);
-
-    // Reset form (except for file input which must be empty always)
-    reset({
-      ...pageToEdit,
-      pageImage: "", // file input stays empty
-    });
+    const blockToEdit = blocks.find((b) => b.blockId === blockId);
+    reset(blockToEdit); // fill form with existing values
   };
 
-  // handle update with FormData (file + text fields)
-  const handleUpdate = async (data) => {
-    try {
-      const formData = new FormData();
+const handleUpdate = async (data) => {
+  try {
+         const formData = new FormData();
 
-      // creating the image in form data 
       Object.keys(data).forEach((key) => {
-        if (key === "pageImage" && data.pageImage && data.pageImage[0]) {
-          formData.append("pageImage", data.pageImage[0]); // file
+        if (key === "blockImage" && data.blockImage && data.blockImage[0]) {
+          formData.append("blockImage", data.blockImage[0]); // file
         } else {
           formData.append(key, data[key]);
         }
       });
-     
-      const res = await axios.put(
-        `${apiBase}/page/page/${editPageId}`,
+    const res = await axios.put(`${apiBase}/block/block/${editBlockId}`,
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }
       );
 
-      if (res.status === 200) {
-        alert("Page updated successfully!");
-        const refreshed = await axios.get(`${apiBase}/page/pages`);
-        setPages(refreshed.data.payload || []);
+    if (res.status === 200) {
+      alert("Block updated successfully!");
+      const refreshed = await axios.get(`${apiBase}/block/blocks`);
+      setBlocks(refreshed.data.payload || []);
 
-        setEditPage(false);
-        setEditPageId(null);
-        reset({});
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update page");
+      setEditBlock(false);
+      setEditBlockId(null);
+      reset({});
     }
-  };
+  } catch (err) {
+    console.error(err);
+    alert("Failed to update block");
+  }
+};
+
 
   return (
     <div>
-      {!editPage ? (
+      {!editBlock ? (
         <>
-          <h2>Pages</h2>
+          <h2>Blocks</h2>
           <table border="1" cellPadding="8" cellSpacing="0">
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Page Title</th>
+                <th>Block Title</th>
+                <th>Subtitle</th>
+                <th>Status</th>
                 <th>Visible</th>
                 <th>Last Updated</th>
                 <th>Edit</th>
               </tr>
             </thead>
             <tbody>
-              {pages.map((page) => (
-                <tr key={page.pageId}>
-                  <td>{page.pageId}</td>
-                  <td>{page.pageTitle}</td>
-                  <td>{page.pageVisibility ? "Yes" : "No"}</td>
+              {blocks.map((block) => (
+                <tr key={block.blockId}>
+                  <td>{block.blockId}</td>
+                  <td>{block.blockTitle}</td>
+                  <td>{block.blockSubtitle}</td>
+                  <td>{block.status}</td>
+                  <td>{block.blockVisibility ? "Yes" : "No"}</td>
                   <td>
-                    {page.updatedOn
-                      ? new Date(page.updatedOn).toLocaleDateString()
+                    {block.updatedOn
+                      ? new Date(block.updatedOn).toLocaleDateString()
                       : "-"}
                   </td>
                   <td>
-                    <button onClick={() => handleEdit(page.pageId)}>
+                    <button onClick={() => handleEdit(block.blockId)}>
                       Edit
                     </button>
                   </td>
@@ -112,42 +109,48 @@ function Index() {
         </>
       ) : (
         <>
-          <h2>Edit Page (ID: {editPageId})</h2>
+          <h2>Edit Block (ID: {editBlockId})</h2>
           <form onSubmit={handleSubmit(handleUpdate)}>
             <div>
-              <input type="number" {...register("pageId")} readOnly />
+              <input type="number" {...register("blockId")} readOnly />
             </div>
 
             <div>
               <label>Title: </label>
               <input
                 type="text"
-                {...register("pageTitle", { required: true })}
+                {...register("blockTitle", { required: true })}
               />
             </div>
-            
 
             <div>
-              <label>Banner Caption: </label>
+              <label>Subtitle: </label>
               <input
                 type="text"
-                {...register("bannerCaption", { required: true })}
+                {...register("blockSubtitle", { required: true })}
               />
             </div>
 
             <div>
               <label>Content: </label>
-              <textarea {...register("pageContent", { required: true })} />
+              <textarea
+                {...register("blockContent", { required: true })}
+              />
             </div>
 
             <div>
               <label>Image Upload (optional): </label>
-              <input type="file" {...register("pageImage")} />
+              <input type="file" {...register("blockImage")} />
             </div>
 
             <div>
-              <label>Url: </label>
-              <input type="text" {...register("pageUrl")} />
+              <label>Link: </label>
+              <input type="text" {...register("blockLink")} />
+            </div>
+
+            <div>
+              <label>Visible: </label>
+              <input type="checkbox" {...register("blockVisibility")} />
             </div>
 
             <div>
@@ -183,8 +186,8 @@ function Index() {
             <button
               type="button"
               onClick={() => {
-                setEditPage(false);
-                setEditPageId(null);
+                setEditBlock(false);
+                setEditBlockId(null);
                 reset({});
               }}
             >
@@ -197,4 +200,4 @@ function Index() {
   );
 }
 
-export default Index;
+export default BlockManagement

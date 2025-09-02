@@ -57,5 +57,5 @@ const configurationSchema = new mongoose.Schema({
     }
 }, { strict: "throw" });
 
-const Configuration=new Mongoose.models('Configuration', configurationSchema);
+const Configuration=new mongoose.model('Configuration', configurationSchema);
 exports=module.exports=Configuration;

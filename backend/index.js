@@ -16,62 +16,27 @@ mongoose.connect(process.env.DBURL)
 app.use(exp.json())
 
 //importing Apis
-//banner api
-const bannerApp=require("./APIs/bannerApi")
-app.use("/banner",bannerApp)
 
-//blog api
-const blogApp=require("./APIs/blogApi")
-app.use("/blog",blogApp)
 
 //block api
 const blockApp=require("./APIs/blockApi")
 app.use("/block",blockApp)
 
-//client api
-const clientApp=require("./APIs/clientApi")
-app.use("/client",clientApp)
-
-//configuration api
-// const configurationApp=require("./APIs/configurationApi")
-// app.use("/configuration",configurationApp)
-
-//currentOpenings api
-const currentOpeningsApp=require("./APIs/currentOpeningsApi")
-app.use("/currentOpenings",currentOpeningsApp)
-
-//event api
-const eventApp=require("./APIs/eventApi")
-app.use("/event",eventApp)
-
-//list api
-const listingApp=require("./APIs/listingApi")
-app.use("/listing",listingApp)
-
-//menu api
-const menuApp=require("./APIs/menuApi")
-app.use("/menu",menuApp)
-
 //pages api
 const pagesApp=require("./APIs/pagesApi")
-app.use("/pages",pagesApp)
+app.use("/page",pagesApp)
 
-//product api
-const productApp=require("./APIs/productApi")
-app.use("/product",productApp)
+//testimonial api
+const testimonialApp=require("./APIs/testimonialApi")
+app.use("/testimonial",testimonialApp)
 
-//subscribedEmails api
-const subscribedEmailApp=require("./APIs/subscribedEmailApi")
-app.use("/subscribedEmails",subscribedEmailApp)
-
-//user api
-const userApp=require("./APIs/userApi")
-app.use("/user",userApp)
-
+//configuration api
+const configurationApp=require("./APIs/configurationApi")
+app.use("/configuration",configurationApp)
 
 //error handler middleware
 
 app.use((err,req,res,next)=>{
-    console.log("err obj in exoress error hanlder",err);
+    console.log("err obj in express error hanlder",err);
     res.send({message:err.message})
 })

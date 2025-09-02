@@ -473,3 +473,6 @@ Content-Type: application/json
 
 ### Delete a product by pageId
 DELETE http://localhost:3000/page/page/1
+
+### Get all testimonials
+GET http://localhost:3000/testimonial/testimonials
