@@ -5,7 +5,7 @@ The frontend is built with **Vite + React** (using `react-hook-form`, `react-rou
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### 1. Clone the repository
 git clone <your-repo-url>
@@ -32,6 +32,7 @@ PORT=3000
 DBURL=mongodb://localhost:27017/openpixel_pbnlisting
 
 Frontend
+
 REACT_APP_API_BASE_URL=hhttp://localhost:3000
 
 ### 4. Run the application
