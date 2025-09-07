@@ -1,10 +1,11 @@
 const exp=require('express');
 const upload = require("../Middleware/uploads"); 
 const blockApp=exp.Router();
+const adminAuth=require('../Middleware/adminAuthMiddleware');
 const Block=require('../models/blockModel');
 const expressAsyncHandler=require('express-async-handler'); 
 // Create a new block
-blockApp.post('/block',upload.single("blockImage"),expressAsyncHandler(async(req,res)=>{
+blockApp.post('/block',adminAuth,upload.single("blockImage"),expressAsyncHandler(async(req,res)=>{
     try {
       const blockData = req.body;
 
@@ -22,21 +23,17 @@ blockApp.post('/block',upload.single("blockImage"),expressAsyncHandler(async(req
     }
 }));
 // Get all blocks       
-blockApp.get('/blocks',expressAsyncHandler(async(req,res)=>{
+blockApp.get('/blocks',adminAuth,expressAsyncHandler(async(req,res)=>{
     const blocks=await Block.find();
     res.status(200).send({message:'Blocks list',payload:blocks});
 }));
-// Get a single block by blockId
-blockApp.get('/block/:blockId',expressAsyncHandler(async(req,res)=>{
-    const block=await Block.findOne({blockId:req.params.blockId});
-    if(!block) return res.status(404).send({message:'Block not found'});
-    res.status(200).send({message:'Block found',payload:block});
-}));
+
+
 // Edit a block by blockId
 blockApp.put('/block/:blockId',
+  adminAuth,
   upload.single("blockImage"), 
   expressAsyncHandler(async(req,res)=>{
-    console.log("Body:", req.body);
     try {
       const modifiedBlock = req.body;
         
@@ -47,7 +44,6 @@ blockApp.put('/block/:blockId',
 
       modifiedBlock.updatedOn = new Date();
 
-      console.log("Modified Block Data:", modifiedBlock);
 
       const latestBlock = await Block.findOneAndUpdate(
         { blockId: Number(req.params.blockId) },
@@ -55,7 +51,6 @@ blockApp.put('/block/:blockId',
         { new: true, runValidators: true }
       );
 
-      console.log("Latest block after update:", latestBlock);
       if (!latestBlock) {
         return res.status(404).send({ message: "Block not found" });
       }
@@ -65,10 +60,5 @@ blockApp.put('/block/:blockId',
       res.status(400).send({ error: err.message });
     }
 }));
-// Delete a block by blockId
-blockApp.delete('/block/:blockId',expressAsyncHandler(async(req,res)=>{
-    const deletedBlock=await Block.findOneAndDelete({blockId:req.params.blockId});
-    if(!deletedBlock) return res.status(404).send({message:'Block not found'});
-    res.status(200).send({message:'Block deleted successfully'});
-}));
+
 module.exports=blockApp;

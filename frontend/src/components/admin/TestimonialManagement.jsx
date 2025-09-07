@@ -1,6 +1,7 @@
 import React from 'react'
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 function TestimonialManagement() {
   const [testimonials, setTestimonials] = useState([]);
@@ -8,6 +9,7 @@ function TestimonialManagement() {
   const [editTestimonialId, setEditTestimonialId] = useState(null);
 
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+    const navigate=useNavigate();
   // react-hook-form
   const {
     register, 
@@ -18,7 +20,7 @@ function TestimonialManagement() {
 
   // fetch all testimonials
   useEffect(() => {
-    axios.get(`${apiBase}/testimonial/testimonials`)
+    axios.get(`${apiBase}/testimonial/testimonials`,{withCredentials: true})
     .then((res)=>setTestimonials(res.data.payload || []))
     .catch((err)=>console.error(err));
   }, []);
@@ -46,12 +48,12 @@ function TestimonialManagement() {
       })
       const res=await axios.put(`${apiBase}/testimonial/testimonial/${editTestimonialId}`,
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { withCredentials: true,headers: { "Content-Type": "multipart/form-data" } }
       );
       if(res.status==200)
       {
         alert("Testimonial updated successfully");
-        const refreshed=await axios.get(`${apiBase}/testimonial/testimonials`)
+        const refreshed=await axios.get(`${apiBase}/testimonial/testimonials`,{withCredentials: true})
         setTestimonials(refreshed.data.payload||[]);
         setEditTestimonial(null)
         reset({});
@@ -70,6 +72,11 @@ function TestimonialManagement() {
         !editTestimonial ?(
           <>
             <h2>Testimonials</h2>
+          <button
+            onClick={() => navigate('/admin/add-testimonial', { state: { size: testimonials.length + 1 } })}
+          >
+            Add Testimonial
+          </button>
           <table border="1" cellPadding="8" cellSpacing="0">
             <thead>
               <tr>

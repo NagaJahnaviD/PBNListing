@@ -1,12 +1,49 @@
-# React + Vite
+# MERN Web Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project is a MERN stack web application with separate `frontend` and `backend` directories.  
+The frontend is built with **Vite + React** (using `react-hook-form`, `react-router-dom`) and the backend is powered by **Express, Mongoose, CORS**, etc.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Getting Started
 
-## Expanding the ESLint configuration
+### 1. Clone the repository
+git clone <your-repo-url>
+cd <your-repo-name>
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 2. Install dependencies
+
+Backend
+
+  cd backend
+  npm install
+
+
+Frontend
+
+cd ../frontend
+npm install
+
+### 3. Setup environment variables
+
+Backend
+
+PORT=3000
+DBURL=mongodb://localhost:27017/openpixel_pbnlisting
+
+Frontend
+
+REACT_APP_API_BASE_URL=hhttp://localhost:3000
+
+### 4. Run the application
+
+Backend
+
+cd backend
+npm start
+
+
+Frontend
+
+cd ../frontend
+npm run dev

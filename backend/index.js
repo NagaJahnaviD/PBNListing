@@ -6,8 +6,12 @@ require('dotenv').config();
 const mongoose=require("mongoose");
 const port=process.env.PORT || 4000;
 const cors = require('cors');
-app.use(cors());
-
+const cookieParser = require("cookie-parser");
+app.use(cookieParser());
+app.use(cors({
+  origin: "http://localhost:5173", // frontend URL
+  credentials: true, // allow cookies
+}));
 
 //db conn
 mongoose.connect(process.env.DBURL)
@@ -16,11 +20,17 @@ mongoose.connect(process.env.DBURL)
 app.use(exp.json())
 
 //importing Apis
+//admin account api
+const adminAccountApp=require("./APIs/adminAccountApi")
+app.use("/admin",adminAccountApp)
 
 
 //block api
 const blockApp=require("./APIs/blockApi")
 app.use("/block",blockApp)
+//blog api
+const blogApp=require("./APIs/blogApi")
+app.use("/blog",blogApp)
 
 //pages api
 const pagesApp=require("./APIs/pagesApi")

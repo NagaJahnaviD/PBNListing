@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 function Index() {
@@ -7,6 +8,7 @@ function Index() {
   const [editPage, setEditPage] = useState(false);
   const [editPageId, setEditPageId] = useState(null);
 
+  const navigate=useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   // react-hook-form
@@ -79,6 +81,11 @@ function Index() {
       {!editPage ? (
         <>
           <h2>Pages</h2>
+          <button
+            onClick={() => navigate('/admin/add-page', { state: { size: pages.length + 1 } })}
+          >
+            Add Page
+          </button>
           <table border="1" cellPadding="8" cellSpacing="0">
             <thead>
               <tr>

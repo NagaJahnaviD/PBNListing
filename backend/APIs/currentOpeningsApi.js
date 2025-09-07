@@ -2,7 +2,7 @@ const exp= require('express');
 const currentOpeningsApp= exp.Router();
 const CurrentOpening=require('../models/currentOpeningsModel');
 const expressAsyncHandler=require('express-async-handler');
-
+const adminAuth=require('../Middleware/adminAuthMiddleware');
 // Create a new current opening
 currentOpeningsApp.post('/currentOpening', expressAsyncHandler(async (req, res) =>
 {

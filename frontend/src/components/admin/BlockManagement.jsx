@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { use } from 'react'
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from 'react-router-dom';
 import axios from "axios";
 
 function BlockManagement() {
-    const [blocks, setBlocks] = useState([]);
+  const [blocks, setBlocks] = useState([]);
   const [editBlock, setEditBlock] = useState(false);
   const [editBlockId, setEditBlockId] = useState(null);
+  const navigate=useNavigate();
 
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
@@ -21,7 +23,7 @@ function BlockManagement() {
   // fetch all blocks
   useEffect(() => {
     axios
-      .get(`${apiBase}/block/blocks`)
+      .get(`${apiBase}/block/blocks`,{withCredentials:true,})
       .then((res) => setBlocks(res.data.payload || []))
       .catch((err) => console.error(err));
   }, []);
@@ -48,12 +50,13 @@ const handleUpdate = async (data) => {
       });
     const res = await axios.put(`${apiBase}/block/block/${editBlockId}`,
         formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        { withCredentials:true,
+          headers: { "Content-Type": "multipart/form-data" } }
       );
 
     if (res.status === 200) {
       alert("Block updated successfully!");
-      const refreshed = await axios.get(`${apiBase}/block/blocks`);
+      const refreshed = await axios.get(`${apiBase}/block/blocks`,{withCredentials:true,});
       setBlocks(refreshed.data.payload || []);
 
       setEditBlock(false);
@@ -72,6 +75,12 @@ const handleUpdate = async (data) => {
       {!editBlock ? (
         <>
           <h2>Blocks</h2>
+          <button
+            onClick={() => navigate('/admin/add-block', { state: { size: blocks.length + 1 } })}
+          >
+            Add Block
+          </button>
+
           <table border="1" cellPadding="8" cellSpacing="0">
             <thead>
               <tr>

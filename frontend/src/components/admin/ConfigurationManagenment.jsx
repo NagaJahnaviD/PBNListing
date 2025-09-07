@@ -18,7 +18,7 @@ function ConfigurationManagenment() {
     // fetch all configiurations
  useEffect(() => {
   axios
-    .get(`${apiBase}/configuration/latest-configuration`)
+    .get(`${apiBase}/configuration/latest-configuration`,{withCredentials: true})
     .then((res) => {
       const data = res.data.payload || {};
       console.log("data",data);
@@ -44,11 +44,11 @@ function ConfigurationManagenment() {
         });
         const res=await axios.put(`${apiBase}/configuration/configuration/${configuration.configId}`,
                  formData,
-        { headers: { "Content-Type": "multipart/form-data" } }
+        {withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
         );
         if (res.status === 200) {
         alert("Configuration updated successfully!");
-        const refreshed = await axios.get(`${apiBase}/configuration/latest-configuration`);
+        const refreshed = await axios.get(`${apiBase}/configuration/latest-configuration`,{withCredentials: true});
         const updatedData = refreshed.data.payload || {};
         setConfiguration(updatedData);
         reset(updatedData);

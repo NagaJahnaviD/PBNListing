@@ -3,20 +3,27 @@ const upload = require("../Middleware/uploads"); // Multer middleware
 const pageApp = exp.Router();
 const Page = require("../models/pageModel");
 const expressAsyncHandler = require("express-async-handler");
+const adminAuth=require('../Middleware/adminAuthMiddleware');
 
 // -----------------------------
 // Create a new page
 // -----------------------------
 pageApp.post(
-  "/page",
-  upload.single("pageImage"), // optional upload
+  "/page",adminAuth,
+  upload.fields([
+    { name: "pageImage", maxCount: 1 },
+    { name: "pageBanner", maxCount: 1 },
+  ]),
   expressAsyncHandler(async (req, res) => {
     try {
       const pageData = req.body;
 
-      // If file uploaded → save path
-      if (req.file) {
-        pageData.pageImage = `/uploads/${req.file.filename}`;
+      // If files uploaded → save paths
+      if (req.files?.pageImage) {
+        pageData.pageImage = `/uploads/${req.files.pageImage[0].filename}`;
+      }
+      if (req.files?.pageBanner) {
+        pageData.pageBanner = `/uploads/${req.files.pageBanner[0].filename}`;
       }
 
       const newPage = new Page(pageData);
@@ -30,51 +37,27 @@ pageApp.post(
 );
 
 // -----------------------------
-// Get all pages
-// -----------------------------
-pageApp.get(
-  "/pages",
-  expressAsyncHandler(async (req, res) => {
-    console.log("Fetching all pages");
-    const pages = await Page.find();
-    console.log(pages);
-    res.status(200).send({ message: "Pages list", payload: pages });
-  })
-);
-
-// -----------------------------
-// Get a single page by pageId
-// -----------------------------
-pageApp.get(
-  "/page/:pageId",
-  expressAsyncHandler(async (req, res) => {
-    const page = await Page.findOne({ pageId: req.params.pageId });
-    if (!page) {
-      return res.status(404).send({ message: "Page not found" });
-    }
-    res.status(200).send({ message: "Page found", payload: page });
-  })
-);
-
-// -----------------------------
 // Edit a page by pageId
 // -----------------------------
 pageApp.put(
-  "/page/:pageId",
-  upload.single("pageImage"), 
+  "/page/:pageId",adminAuth,
+  upload.fields([
+    { name: "pageImage", maxCount: 1 },
+    { name: "pageBanner", maxCount: 1 },
+  ]),
   expressAsyncHandler(async (req, res) => {
-    console.log("Body:", req.body);
     try {
       const modifiedPage = req.body;
-        
-      // If new file uploaded → overwrite path
-      if (req.file) {
-        modifiedPage.pageImage = `/uploads/${req.file.filename}`;
+
+      // If new files uploaded → overwrite paths
+      if (req.files?.pageImage) {
+        modifiedPage.pageImage = `/uploads/${req.files.pageImage[0].filename}`;
+      }
+      if (req.files?.pageBanner) {
+        modifiedPage.pageBanner = `/uploads/${req.files.pageBanner[0].filename}`;
       }
 
       modifiedPage.updatedOn = new Date();
-
-      console.log("Modified Page Data:", modifiedPage);
 
       const latestPage = await Page.findOneAndUpdate(
         { pageId: Number(req.params.pageId) },
@@ -82,7 +65,6 @@ pageApp.put(
         { new: true, runValidators: true }
       );
 
-      console.log("Latest Page after update:", latestPage);
       if (!latestPage) {
         return res.status(404).send({ message: "Page not found" });
       }
@@ -93,22 +75,18 @@ pageApp.put(
     }
   })
 );
-
 // -----------------------------
-// Delete a page by pageId
+// Get all pages
 // -----------------------------
-pageApp.delete(
-  "/page/:pageId",
+pageApp.get(
+  "/pages",adminAuth,
   expressAsyncHandler(async (req, res) => {
-    const deletedPage = await Page.findOneAndDelete({
-      pageId: req.params.pageId,
-    });
-
-    if (!deletedPage) {
-      return res.status(404).send({ message: "Page not found" });
-    }
-    res.status(200).send({ message: "Page deleted successfully" });
+    const pages = await Page.find();
+    res.status(200).send({ message: "Pages list", payload: pages });
   })
 );
+
+
+
 
 module.exports = pageApp;

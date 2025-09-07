@@ -3,10 +3,11 @@ const configurationApp= exp.Router();
 const Configuration=require('../models/configurationModel');
 const expressAsyncHandler=require('express-async-handler');
 const upload = require('../Middleware/uploads');
+const adminAuth=require('../Middleware/adminAuthMiddleware');
 
 // Edit a configuration by configId    
 configurationApp.put('/configuration/:configId',
-  upload.fields([
+  adminAuth,upload.fields([
     { name: "headerLogo", maxCount: 1 },
     { name: "footerLogo", maxCount: 1 }
   ]), expressAsyncHandler(async (req, res) =>    
@@ -25,7 +26,7 @@ configurationApp.put('/configuration/:configId',
 
 
 //get latest configuration
-configurationApp.get('/latest-configuration', expressAsyncHandler(async (req, res) => {
+configurationApp.get('/latest-configuration',adminAuth, expressAsyncHandler(async (req, res) => {
     const latestConfiguration = await Configuration.findOne().sort({ createdAt: -1 });
     if (!latestConfiguration) return res.status(404).send({ message: 'No configuration found' });
     res.status(200).send({ message: 'Latest configuration', payload: latestConfiguration });

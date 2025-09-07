@@ -3,13 +3,15 @@ const upload=require("../Middleware/uploads"); // Multer middleware
 const testimonialApp=exp.Router();
 const Testimonial=require("../models/testimonialModel");
 const expressAsyncHandler=require("express-async-handler");
+const adminAuth=require('../Middleware/adminAuthMiddleware');
 
 // -----------------------------            
 // Create a new testimonial
 // -----------------------------
-testimonialApp.post("/testimonial",upload.single("testimonialImage"),expressAsyncHandler(async(req,res)=>{
+testimonialApp.post("/testimonial",adminAuth,upload.single("testimonialImage"),expressAsyncHandler(async(req,res)=>{
     try{
         const testimonialData=req.body;
+        console.log(testimonialData);
         if(req.file){
             testimonialData.testimonialImage=`/uploads/${req.file.filename}`;
         }
@@ -24,8 +26,7 @@ testimonialApp.post("/testimonial",upload.single("testimonialImage"),expressAsyn
 // -----------------------------
 // Get all testimonials
 // -----------------------------
-testimonialApp.get("/testimonials",expressAsyncHandler(async(req,res)=>{
-    console.log("Fetching all testimonials");
+testimonialApp.get("/testimonials",adminAuth,expressAsyncHandler(async(req,res)=>{
     const testimonials=await Testimonial.find();
     res.status(200).send({message:"Testimonials list",payload:testimonials});
 }))
@@ -33,7 +34,7 @@ testimonialApp.get("/testimonials",expressAsyncHandler(async(req,res)=>{
 // -----------------------------
 // Get a single testimonial by testimonialId
 // -----------------------------
-testimonialApp.get("/testimonial/:testimonialId",expressAsyncHandler(async(req,res)=>{
+testimonialApp.get("/testimonial/:testimonialId",adminAuth,expressAsyncHandler(async(req,res)=>{
     const testimonial=await Testimonial.findOne({testimonialId:req.params.testimonialId});
     if(!testimonial){
         return res.status(404).send({message:"Testimonial not found"});
@@ -44,8 +45,7 @@ testimonialApp.get("/testimonial/:testimonialId",expressAsyncHandler(async(req,r
 // -----------------------------
 // Edit a testimonial by testimonialId
 // -----------------------------    
-testimonialApp.put("/testimonial/:testimonialId",upload.single("testimonialImage"),expressAsyncHandler(async(req,res)=>{
-    console.log("Body:", req.body);
+testimonialApp.put("/testimonial/:testimonialId",adminAuth,upload.single("testimonialImage"),expressAsyncHandler(async(req,res)=>{
     try{
         const modifiedTestimonial=req.body;
         if(req.file){
@@ -55,13 +55,11 @@ testimonialApp.put("/testimonial/:testimonialId",upload.single("testimonialImage
             modifiedTestimonial.reviewValue = Number(modifiedTestimonial.reviewValue);
         }
         modifiedTestimonial.updatedOn=new Date();
-        console.log("Modified Testimonial Data:", modifiedTestimonial);
         const latestTestimonial=await Testimonial.findOneAndUpdate(
             {testimonialId:Number(req.params.testimonialId)},
             {...modifiedTestimonial},   
             {new:true,runValidators:true}
         );
-        console.log("Latest Testimonial after update:", latestTestimonial);
         if(!latestTestimonial){
             return res.status(404).send({message:"Testimonial not found"});
         }

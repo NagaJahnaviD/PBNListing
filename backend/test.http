@@ -476,3 +476,45 @@ DELETE http://localhost:3000/page/page/1
 
 ### Get all testimonials
 GET http://localhost:3000/testimonial/testimonials
+
+
+
+
+### Admin Login
+POST http://localhost:3000/admin/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "1234567"
+}
+
+### Admin Login - Wrong Password
+POST http://localhost:3000/admin/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "wrongpassword"
+}
+
+### Change Password - Protected
+POST http://localhost:3000/admin/change-password
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY4YmM4M2E2ZmNlOTljNGRmMWUyNTg4NyIsInVzZXJuYW1lIjoiYWRtaW4iLCJpYXQiOjE3NTcxODUwODQsImV4cCI6MTc1NzE4ODY4NH0.LAbKeU91J9xxMtunWrmvyT9RmVtJ_s-zlNdsfPdX_Tc
+
+{
+  "oldPassword": "123456",
+  "newPassword": "1234567"
+}
+
+
+### Change Password - Wrong Old Password
+POST http://localhost:3000/admin/change-password
+Content-Type: application/json
+Authorization: Bearer {{TOKEN}}
+
+{
+  "oldPassword": "wrongoldpass",
+  "newPassword": "Admin@456"
+}
