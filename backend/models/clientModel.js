@@ -3,9 +3,9 @@ const clientSchema = new mongoose.Schema({
     clientId: { type: String, required: true, unique: true },   
     clientTitle: { type: String, required: true },
     clientDescription: { type: String, required: true },
-    clientLocation: { type: String, required: true },
-    clientImage: { type: String, required: true },
-    clientUrl: { type: String, required: true },
+    clientLocation: { type: String },
+    clientImage: { type: String },
+    clientUrl: { type: String },
     status: {
         type: String,
         maxlength: 1,

@@ -32,6 +32,14 @@ app.use("/block",blockApp)
 const blogApp=require("./APIs/blogApi")
 app.use("/blog",blogApp)
 
+//banner api
+const bannerApp=require("./APIs/bannerApi")
+app.use("/banner",bannerApp)
+
+//client api
+const clientApp=require("./APIs/clientApi")
+app.use("/client",clientApp)
+
 //pages api
 const pagesApp=require("./APIs/pagesApi")
 app.use("/page",pagesApp)

@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function BlogManagement() {
   const [blogs, setBlogs] = useState([]);
   const [editBlog, setEditBlog] = useState(false);
   const [editBlogId, setEditBlogId] = useState(null);
-  const navigate = useNavigate();
 
+  const [imagePreview, setImagePreview] = useState(null);
+  const [bannerPreview, setBannerPreview] = useState(null);
+
+  const navigate = useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   const {
@@ -21,10 +24,18 @@ function BlogManagement() {
   // fetch all blogs
   useEffect(() => {
     axios
-      .get(`${apiBase}/blog/blogs`,{withCredentials: true})
+      .get(`${apiBase}/blog/blogs`, { withCredentials: true })
       .then((res) => setBlogs(res.data.payload || []))
       .catch((err) => console.error(err));
   }, []);
+
+  // file change handler for preview
+  const handleFileChange = (e, setPreview) => {
+    const file = e.target.files[0];
+    if (file) {
+      setPreview(URL.createObjectURL(file));
+    }
+  };
 
   // handle edit
   const handleEdit = (blogId) => {
@@ -32,6 +43,22 @@ function BlogManagement() {
     setEditBlogId(blogId);
 
     const blogToEdit = blogs.find((b) => b.blogId === blogId);
+
+    // format date for <input type="date" />
+    if (blogToEdit?.blogDate) {
+      blogToEdit.blogDate = new Date(blogToEdit.blogDate)
+        .toISOString()
+        .split("T")[0];
+    }
+
+    // set previews from DB
+    if (blogToEdit?.blogImage) {
+      setImagePreview(`${apiBase}${blogToEdit.blogImage}`);
+    }
+    if (blogToEdit?.blogBanner) {
+      setBannerPreview(`${apiBase}${blogToEdit.blogBanner}`);
+    }
+
     reset(blogToEdit);
   };
 
@@ -41,9 +68,18 @@ function BlogManagement() {
       const formData = new FormData();
 
       Object.keys(data).forEach((key) => {
-        if ((key === "blogImage" || key === "blogBanner") && data[key] && data[key][0]) {
+        if (
+          (key === "blogImage" || key === "blogBanner") &&
+          data[key] &&
+          data[key][0]
+        ) {
           formData.append(key, data[key][0]); // files
-        } else {
+        } else if (
+          data[key] !== "" &&
+          data[key] !== "null" &&
+          data[key] !== null &&
+          data[key] !== undefined
+        ) {
           formData.append(key, data[key]);
         }
       });
@@ -51,16 +87,24 @@ function BlogManagement() {
       const res = await axios.put(
         `${apiBase}/blog/blog/${editBlogId}`,
         formData,
-        { withCredentials: true,headers: { "Content-Type": "multipart/form-data" } }
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
 
       if (res.status === 200) {
         alert("Blog updated successfully!");
-        const refreshed = await axios.get(`${apiBase}/blog/blogs`,{withCredentials: true});
+        const refreshed = await axios.get(`${apiBase}/blog/blogs`, {
+          withCredentials: true,
+        });
         setBlogs(refreshed.data.payload || []);
 
+        // reset state
         setEditBlog(false);
         setEditBlogId(null);
+        setImagePreview(null);
+        setBannerPreview(null);
         reset({});
       }
     } catch (err) {
@@ -75,7 +119,11 @@ function BlogManagement() {
         <>
           <h2>Blogs</h2>
           <button
-            onClick={() => navigate('/admin/add-blog', { state: { size: blogs.length + 1 } })}
+            onClick={() =>
+              navigate("/admin/add-blog", {
+                state: { size: blogs.length + 1 },
+              })
+            }
           >
             Add Blog
           </button>
@@ -97,7 +145,11 @@ function BlogManagement() {
                 <tr key={blog.blogId}>
                   <td>{blog.blogId}</td>
                   <td>{blog.blogTitle}</td>
-                  <td>{new Date(blog.blogDate).toLocaleDateString()}</td>
+                  <td>
+                    {blog.blogDate
+                      ? new Date(blog.blogDate).toLocaleDateString()
+                      : "-"}
+                  </td>
                   <td>{blog.blogAuthor}</td>
                   <td>{blog.status}</td>
                   <td>
@@ -123,12 +175,18 @@ function BlogManagement() {
 
             <div>
               <label>Title: </label>
-              <input type="text" {...register("blogTitle", { required: true })} />
+              <input
+                type="text"
+                {...register("blogTitle", { required: true })}
+              />
             </div>
 
             <div>
               <label>Date: </label>
-              <input type="date" {...register("blogDate", { required: true })} />
+              <input
+                type="date"
+                {...register("blogDate", { required: true })}
+              />
             </div>
 
             <div>
@@ -138,12 +196,38 @@ function BlogManagement() {
 
             <div>
               <label>Image Upload (optional): </label>
-              <input type="file" {...register("blogImage")} />
+              <input
+                type="file"
+                {...register("blogImage")}
+                onChange={(e) => handleFileChange(e, setImagePreview)}
+              />
+              {imagePreview && (
+                <div>
+                  <img
+                    src={imagePreview}
+                    alt="Blog"
+                    style={{ width: "150px", marginTop: "10px" }}
+                  />
+                </div>
+              )}
             </div>
 
             <div>
               <label>Banner Upload (optional): </label>
-              <input type="file" {...register("blogBanner")} />
+              <input
+                type="file"
+                {...register("blogBanner")}
+                onChange={(e) => handleFileChange(e, setBannerPreview)}
+              />
+              {bannerPreview && (
+                <div>
+                  <img
+                    src={bannerPreview}
+                    alt="Banner"
+                    style={{ width: "150px", marginTop: "10px" }}
+                  />
+                </div>
+              )}
             </div>
 
             <div>
@@ -163,27 +247,6 @@ function BlogManagement() {
                 <option value="I">Inactive</option>
               </select>
             </div>
-
-            <div>
-              <label>Created By (UserId): </label>
-              <input type="number" {...register("createdBy")} />
-            </div>
-
-            <div>
-              <label>Created On: </label>
-              <input type="date" {...register("createdOn")} />
-            </div>
-
-            <div>
-              <label>Updated By (UserId): </label>
-              <input type="number" {...register("updatedBy")} />
-            </div>
-
-            <div>
-              <label>Updated On: </label>
-              <input type="date" {...register("updatedOn")} />
-            </div>
-
             <br />
             <button type="submit">Save</button>
             <button
@@ -191,6 +254,8 @@ function BlogManagement() {
               onClick={() => {
                 setEditBlog(false);
                 setEditBlogId(null);
+                setImagePreview(null);
+                setBannerPreview(null);
                 reset({});
               }}
             >

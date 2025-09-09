@@ -1,5 +1,7 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js"; // needed for dropdown
 import './index.css'
 import RootLayout from './components/user/RootLayout'
 import Index from './components/admin/Index'
@@ -15,7 +17,10 @@ import AddPage from './components/admin/AddPage'
 import AddBlock from './components/admin/AddBlock'
 import BlogManagement from './components/admin/BlogManagement'
 import AddBlog from './components/admin/AddBlog'
-import "bootstrap/dist/css/bootstrap.css"
+import AddClient from './components/admin/AddClient'
+import AddBanner from './components/admin/AddBanner'
+import BannerManagement from './components/admin/BannerManagement'
+import ClientManagement from './components/admin/ClientManagement'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 const browserRouterObj = createBrowserRouter([
 
@@ -72,6 +77,22 @@ const browserRouterObj = createBrowserRouter([
       {
         path: "add-blog",
         element: <AddBlog />,
+      },
+      {
+        path: "client-list",
+        element: <ClientManagement />,
+      },
+      {
+        path: "add-client",
+        element: <AddClient />,
+      },
+      {
+        path: "banner-list",
+        element: <BannerManagement />,
+      },
+      {
+        path: "add-banner",
+        element: <AddBanner />,
       },
       {
         path: "configuration",

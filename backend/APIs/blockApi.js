@@ -36,7 +36,7 @@ blockApp.put('/block/:blockId',
   expressAsyncHandler(async(req,res)=>{
     try {
       const modifiedBlock = req.body;
-        
+        console.log("mod block", modifiedBlock);
       // If new file uploaded → overwrite path
       if (req.file) {
         modifiedBlock.blockImage = `/uploads/${req.file.filename}`;

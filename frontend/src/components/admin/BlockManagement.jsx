@@ -44,7 +44,7 @@ const handleUpdate = async (data) => {
       Object.keys(data).forEach((key) => {
         if (key === "blockImage" && data.blockImage && data.blockImage[0]) {
           formData.append("blockImage", data.blockImage[0]); // file
-        } else {
+        } else if (data[key] !== "" && data[key] !== "null" && data[key] !== null && data[key] !== undefined) {
           formData.append(key, data[key]);
         }
       });
@@ -168,26 +168,6 @@ const handleUpdate = async (data) => {
                 <option value="A">Active</option>
                 <option value="I">Inactive</option>
               </select>
-            </div>
-
-            <div>
-              <label>Created By (UserId): </label>
-              <input type="number" {...register("createdBy")} />
-            </div>
-
-            <div>
-              <label>Created On: </label>
-              <input type="date" {...register("createdOn")} />
-            </div>
-
-            <div>
-              <label>Updated By (UserId): </label>
-              <input type="number" {...register("updatedBy")} />
-            </div>
-
-            <div>
-              <label>Updated On: </label>
-              <input type="date" {...register("updatedOn")} />
             </div>
 
             <br />

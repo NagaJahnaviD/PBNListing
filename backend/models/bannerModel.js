@@ -31,14 +31,16 @@ const bannerSchema = new mongoose.Schema({
         default: "A"   
     },
     createdBy: {
-        type: Number
+        type: Number,
+        default: 1
     },
     createdOn: {
         type: Date,
         default: Date.now
     },
     updatedBy: {
-        type: Number
+        type: Number,
+        default: 1
     },
     updatedOn: {
         type: Date,

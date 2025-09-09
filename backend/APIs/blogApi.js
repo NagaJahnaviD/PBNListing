@@ -17,12 +17,13 @@ blogApp.post('/blog',adminAuth,
 }));
 
 // Edit a blog by blogId
-blogApp.put('/blog',
+blogApp.put('/blog/:blogId',
   adminAuth,upload.fields([
     { name: "blogImage", maxCount: 1 },
     { name: "blogBanner", maxCount: 1 },
   ]), expressAsyncHandler(async (req, res) => {
     const { blogId, ...modifiedBlog } = req.body;
+    console.log("mod blog", modifiedBlog);
     if (!blogId) return res.status(400).send({ message: 'blogId is required' });
     const latestBlog = await Blog.findOneAndUpdate(
         { blogId },

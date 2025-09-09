@@ -22,7 +22,7 @@ function Index() {
   // fetch all pages
   useEffect(() => {
     axios
-      .get(`${apiBase}/page/pages`)
+      .get(`${apiBase}/page/pages`,{withCredentials:true})
       .then((res) => setPages(res.data.payload || []))
       .catch((err) => console.error(err));
   }, []);
@@ -101,7 +101,7 @@ function Index() {
                 <tr key={page.pageId}>
                   <td>{page.pageId}</td>
                   <td>{page.pageTitle}</td>
-                  <td>{page.pageVisibility ? "Yes" : "No"}</td>
+                  <td>{page.publishStatus ? "Yes" : "No"}</td>
                   <td>
                     {page.updatedOn
                       ? new Date(page.updatedOn).toLocaleDateString()
@@ -159,32 +159,11 @@ function Index() {
 
             <div>
               <label>Status: </label>
-              <select {...register("status")}>
+              <select {...register("publishStatus")}>
                 <option value="A">Active</option>
                 <option value="I">Inactive</option>
               </select>
             </div>
-
-            <div>
-              <label>Created By (UserId): </label>
-              <input type="number" {...register("createdBy")} />
-            </div>
-
-            <div>
-              <label>Created On: </label>
-              <input type="date" {...register("createdOn")} />
-            </div>
-
-            <div>
-              <label>Updated By (UserId): </label>
-              <input type="number" {...register("updatedBy")} />
-            </div>
-
-            <div>
-              <label>Updated On: </label>
-              <input type="date" {...register("updatedOn")} />
-            </div>
-
             <br />
             <button type="submit">Save</button>
             <button
