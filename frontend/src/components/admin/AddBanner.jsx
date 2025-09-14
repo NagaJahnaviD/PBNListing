@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -10,34 +10,37 @@ function AddBanner() {
   const { size } = location.state || {};
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
+  const [bannerImagePreview, setBannerImagePreview] = useState(null);
+
+  const handleFilePreview = (e, setPreview) => {
+    const file = e.target.files[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
+
   const handleAdd = async (data) => {
     try {
       const formData = new FormData();
-
       Object.keys(data).forEach((key) => {
         if (key === "bannerImage" && data.bannerImage && data.bannerImage[0]) {
-          formData.append("bannerImage", data.bannerImage[0]); // file
+          formData.append("bannerImage", data.bannerImage[0]);
         } else {
           formData.append(key, data[key]);
         }
       });
 
-      // set auto bannerId
       formData.set("bannerId", size);
 
       const res = await axios.post(
         `${apiBase}/banner/banner`,
         formData,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
       );
 
       if (res.status === 201) {
         alert("Banner added successfully!");
         navigate("/admin/banner-list");
         reset({});
+        setBannerImagePreview(null);
       }
     } catch (err) {
       console.error(err);
@@ -47,27 +50,33 @@ function AddBanner() {
 
   return (
     <div>
-      <h2>Banner ID: {size} </h2>
+      <h2>Banner ID: {size}</h2>
       <form onSubmit={handleSubmit(handleAdd)}>
 
         <div>
           <label>Title: </label>
-          <input
-            type="text"
-            {...register("bannerTitle", { required: true })}
-          />
+          <input type="text" {...register("bannerTitle", { required: true })} />
         </div>
 
         <div>
           <label>Content: </label>
-          <textarea
-            {...register("bannerContent", { required: true })}
-          />
+          <textarea {...register("bannerContent", { required: true })} />
         </div>
 
         <div>
           <label>Image Upload (optional): </label>
-          <input type="file" {...register("bannerImage")} />
+          {bannerImagePreview && (
+            <img
+              src={bannerImagePreview}
+              alt="Banner Preview"
+              style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+            />
+          )}
+          <input
+            type="file"
+            {...register("bannerImage")}
+            onChange={(e) => handleFilePreview(e, setBannerImagePreview)}
+          />
         </div>
 
         <div>
@@ -112,9 +121,7 @@ function AddBanner() {
         <button type="submit">Add</button>
         <button
           type="button"
-          onClick={() => {
-            reset({});
-          }}
+          onClick={() => { reset({}); setBannerImagePreview(null); }}
         >
           Cancel
         </button>

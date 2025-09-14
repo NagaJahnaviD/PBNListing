@@ -1,14 +1,23 @@
-import React from 'react'
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function AddPage() {
+  const [bannerPreview, setBannerPreview] = useState(null); // preview for banner
+  const [imagePreview, setImagePreview] = useState(null);   // preview for page image
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const location = useLocation();
   const navigate = useNavigate();
   const { size } = location.state || {};
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+  // handle file preview
+  const handleFilePreview = (e, setPreview) => {
+    const file = e.target.files[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
 
   const handleAdd = async (data) => {
     try {
@@ -27,12 +36,14 @@ function AddPage() {
       const res = await axios.post(
         `${apiBase}/page/page`,
         formData,
-        { withCredentials: true,headers: { "Content-Type": "multipart/form-data" } }
+        { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
       );
 
       if (res.status === 201) {
         alert("Page created successfully!");
         reset({});
+        setBannerPreview(null);
+        setImagePreview(null);
         navigate('/admin');
       }
     } catch (err) {
@@ -73,13 +84,36 @@ function AddPage() {
 
         <div>
           <label>Page Banner (optional): </label>
-          <input type="file" {...register("pageBanner")} />
+          {bannerPreview && (
+            <img
+              src={bannerPreview}
+              alt="Banner Preview"
+              style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+            />
+          )}
+          <input
+            type="file"
+            {...register("pageBanner")}
+            onChange={(e) => handleFilePreview(e, setBannerPreview)}
+          />
         </div>
 
         <div>
           <label>Page Image (optional): </label>
-          <input type="file" {...register("pageImage")} />
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Page Image Preview"
+              style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+            />
+          )}
+          <input
+            type="file"
+            {...register("pageImage")}
+            onChange={(e) => handleFilePreview(e, setImagePreview)}
+          />
         </div>
+
 
         <div>
           <label>Page Top Content: </label>

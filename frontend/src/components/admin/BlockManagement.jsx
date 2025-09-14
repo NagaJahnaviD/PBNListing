@@ -1,18 +1,17 @@
-import React, { use } from 'react'
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function BlockManagement() {
   const [blocks, setBlocks] = useState([]);
   const [editBlock, setEditBlock] = useState(false);
   const [editBlockId, setEditBlockId] = useState(null);
-  const navigate=useNavigate();
+  const [newImagePreview, setNewImagePreview] = useState(null);
 
+  const navigate = useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  // react-hook-form
   const {
     register,
     handleSubmit,
@@ -20,55 +19,69 @@ function BlockManagement() {
     formState: { errors },
   } = useForm();
 
-  // fetch all blocks
+  // Fetch all blocks
   useEffect(() => {
     axios
-      .get(`${apiBase}/block/blocks`,{withCredentials:true,})
+      .get(`${apiBase}/block/blocks`, { withCredentials: true })
       .then((res) => setBlocks(res.data.payload || []))
       .catch((err) => console.error(err));
   }, []);
 
-  // handle edit click
+  // Handle file preview
+  const handleFilePreview = (e, setPreview) => {
+    const file = e.target.files[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
+
+  // Handle edit click
   const handleEdit = (blockId) => {
     setEditBlock(true);
     setEditBlockId(blockId);
+    setNewImagePreview(null);
 
     const blockToEdit = blocks.find((b) => b.blockId === blockId);
-    reset(blockToEdit); // fill form with existing values
+    reset(blockToEdit);
   };
 
-const handleUpdate = async (data) => {
-  try {
-         const formData = new FormData();
+  // Handle update
+  const handleUpdate = async (data) => {
+    try {
+      const formData = new FormData();
 
       Object.keys(data).forEach((key) => {
         if (key === "blockImage" && data.blockImage && data.blockImage[0]) {
-          formData.append("blockImage", data.blockImage[0]); // file
-        } else if (data[key] !== "" && data[key] !== "null" && data[key] !== null && data[key] !== undefined) {
+          formData.append("blockImage", data.blockImage[0]);
+        } else if (data[key] !== "" && data[key] !== null && data[key] !== undefined) {
           formData.append(key, data[key]);
         }
       });
-    const res = await axios.put(`${apiBase}/block/block/${editBlockId}`,
+
+      const res = await axios.put(
+        `${apiBase}/block/block/${editBlockId}`,
         formData,
-        { withCredentials:true,
-          headers: { "Content-Type": "multipart/form-data" } }
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
 
-    if (res.status === 200) {
-      alert("Block updated successfully!");
-      const refreshed = await axios.get(`${apiBase}/block/blocks`,{withCredentials:true,});
-      setBlocks(refreshed.data.payload || []);
+      if (res.status === 200) {
+        alert("Block updated successfully!");
+        const refreshed = await axios.get(`${apiBase}/block/blocks`, {
+          withCredentials: true,
+        });
+        setBlocks(refreshed.data.payload || []);
 
-      setEditBlock(false);
-      setEditBlockId(null);
-      reset({});
+        setEditBlock(false);
+        setEditBlockId(null);
+        setNewImagePreview(null);
+        reset({});
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update block");
     }
-  } catch (err) {
-    console.error(err);
-    alert("Failed to update block");
-  }
-};
-
+  };
 
   return (
     <div>
@@ -76,7 +89,9 @@ const handleUpdate = async (data) => {
         <>
           <h2>Blocks</h2>
           <button
-            onClick={() => navigate('/admin/add-block', { state: { size: blocks.length + 1 } })}
+            onClick={() =>
+              navigate("/admin/add-block", { state: { size: blocks.length + 1 } })
+            }
           >
             Add Block
           </button>
@@ -107,9 +122,7 @@ const handleUpdate = async (data) => {
                       : "-"}
                   </td>
                   <td>
-                    <button onClick={() => handleEdit(block.blockId)}>
-                      Edit
-                    </button>
+                    <button onClick={() => handleEdit(block.blockId)}>Edit</button>
                   </td>
                 </tr>
               ))}
@@ -126,30 +139,47 @@ const handleUpdate = async (data) => {
 
             <div>
               <label>Title: </label>
-              <input
-                type="text"
-                {...register("blockTitle", { required: true })}
-              />
+              <input type="text" {...register("blockTitle", { required: true })} />
             </div>
 
             <div>
               <label>Subtitle: </label>
-              <input
-                type="text"
-                {...register("blockSubtitle", { required: true })}
-              />
+              <input type="text" {...register("blockSubtitle", { required: true })} />
             </div>
 
             <div>
               <label>Content: </label>
-              <textarea
-                {...register("blockContent", { required: true })}
-              />
+              <textarea {...register("blockContent", { required: true })} />
             </div>
 
+            {/* Block Image Preview */}
             <div>
               <label>Image Upload (optional): </label>
-              <input type="file" {...register("blockImage")} />
+
+              {/* Existing image */}
+              {blocks.find((b) => b.blockId === editBlockId)?.blockImage &&
+                !newImagePreview && (
+                  <img
+                    src={`${apiBase}${blocks.find((b) => b.blockId === editBlockId).blockImage}`}
+                    alt="Current Block"
+                    style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+                  />
+                )}
+
+              {/* New image preview */}
+              {newImagePreview && (
+                <img
+                  src={newImagePreview}
+                  alt="New Block Preview"
+                  style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+                />
+              )}
+
+              <input
+                type="file"
+                {...register("blockImage")}
+                onChange={(e) => handleFilePreview(e, setNewImagePreview)}
+              />
             </div>
 
             <div>
@@ -177,6 +207,7 @@ const handleUpdate = async (data) => {
               onClick={() => {
                 setEditBlock(false);
                 setEditBlockId(null);
+                setNewImagePreview(null);
                 reset({});
               }}
             >
@@ -189,4 +220,4 @@ const handleUpdate = async (data) => {
   );
 }
 
-export default BlockManagement
+export default BlockManagement;

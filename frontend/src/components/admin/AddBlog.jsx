@@ -1,16 +1,23 @@
-
-
-import React from 'react'
+import React, { useState } from 'react'
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function AddBlog() {
+  const [blogImagePreview, setBlogImagePreview] = useState(null);
+  const [blogBannerPreview, setBlogBannerPreview] = useState(null);
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const location = useLocation();
   const navigate = useNavigate();
   const { size } = location.state || {};
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+  // handle file preview
+  const handleFilePreview = (e, setPreview) => {
+    const file = e.target.files[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
 
   const handleAdd = async (data) => {
     const formData = new FormData();
@@ -24,20 +31,17 @@ function AddBlog() {
       });
       formData.set("blogId", size);
 
-      console.log("Form Data Entries:");
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
-
       const res = await axios.post(`${apiBase}/blog/blog`,
         formData,
-        { withCredentials: true,headers: { "Content-Type": "multipart/form-data" } }
+        { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
       );
 
       if (res.status === 201) {
         alert("Blog created successfully");
-        navigate('/admin/blog-list');
         reset({});
+        setBlogImagePreview(null);
+        setBlogBannerPreview(null);
+        navigate('/admin/blog-list');
       }
     } catch (err) {
       console.error(err);
@@ -75,14 +79,38 @@ function AddBlog() {
           <input type="text" {...register("blogUrl")} />
         </div>
 
+        {/* Blog Image Preview */}
         <div>
           <label>Blog Image (optional): </label>
-          <input type="file" {...register("blogImage")} />
+          {blogImagePreview && (
+            <img
+              src={blogImagePreview}
+              alt="Blog Image Preview"
+              style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+            />
+          )}
+          <input
+            type="file"
+            {...register("blogImage")}
+            onChange={(e) => handleFilePreview(e, setBlogImagePreview)}
+          />
         </div>
 
+        {/* Blog Banner Preview */}
         <div>
           <label>Blog Banner (optional): </label>
-          <input type="file" {...register("blogBanner")} />
+          {blogBannerPreview && (
+            <img
+              src={blogBannerPreview}
+              alt="Blog Banner Preview"
+              style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+            />
+          )}
+          <input
+            type="file"
+            {...register("blogBanner")}
+            onChange={(e) => handleFilePreview(e, setBlogBannerPreview)}
+          />
         </div>
 
         <div>
@@ -117,7 +145,11 @@ function AddBlog() {
         <button type="submit">Add</button>
         <button
           type="button"
-          onClick={() => reset({})}
+          onClick={() => {
+            reset({});
+            setBlogImagePreview(null);
+            setBlogBannerPreview(null);
+          }}
         >
           Cancel
         </button>

@@ -14,14 +14,17 @@ bannerApp.post(
     try {
       const bannerData = req.body;
 
-      // If file uploaded → save path
       if (req.file) {
         bannerData.bannerImage = `/uploads/${req.file.filename}`;
       }
 
+      // 👇 force creator info from token
+      bannerData.createdBy = req.admin.adminId;
+      bannerData.updatedBy = req.admin.adminId;
+      bannerData.createdOn = new Date();
+      bannerData.updatedOn = new Date();
+
       const newBanner = new Banner(bannerData);
-      newBanner.updatedOn = new Date();
-      newBanner.createdOn = new Date();
       const bannerObj = await newBanner.save();
 
       res.status(201).send({ message: "Banner created", payload: bannerObj });
@@ -30,6 +33,7 @@ bannerApp.post(
     }
   })
 );
+
 
 // Get all banners
 bannerApp.get(
@@ -61,36 +65,32 @@ bannerApp.put(
   upload.single("bannerImage"),
   expressAsyncHandler(async (req, res) => {
     try {
-      const modifiedBanner = req.body;
+      const modifiedBanner = { ...req.body };
 
-      // If new file uploaded → overwrite path
       if (req.file) {
         modifiedBanner.bannerImage = `/uploads/${req.file.filename}`;
       }
 
+      modifiedBanner.updatedBy = req.admin.adminId;
       modifiedBanner.updatedOn = new Date();
-      console.log("modified banner", modifiedBanner);
 
       const latestBanner = await Banner.findOneAndUpdate(
         { bannerId: req.params.bannerId },
-        { ...modifiedBanner },
+        modifiedBanner,
         { new: true, runValidators: true }
       );
 
       if (!latestBanner) {
-        console.log("no banner");
         return res.status(404).send({ message: "Banner not found" });
       }
 
-      res
-        .status(200)
-        .send({ message: "Banner updated", payload: latestBanner });
+      res.status(200).send({ message: "Banner updated", payload: latestBanner });
     } catch (err) {
-        console.log(err);
       res.status(400).send({ error: err.message });
     }
   })
 );
+
 
 // Delete a banner by bannerId
 bannerApp.delete(

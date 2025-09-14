@@ -3,13 +3,14 @@ const upload = require("../Middleware/uploads"); // Multer middleware
 const pageApp = exp.Router();
 const Page = require("../models/pageModel");
 const expressAsyncHandler = require("express-async-handler");
-const adminAuth=require('../Middleware/adminAuthMiddleware');
+const adminAuth = require("../Middleware/adminAuthMiddleware");
 
 // -----------------------------
 // Create a new page
 // -----------------------------
 pageApp.post(
-  "/page",adminAuth,
+  "/page",
+  adminAuth,
   upload.fields([
     { name: "pageImage", maxCount: 1 },
     { name: "pageBanner", maxCount: 1 },
@@ -26,6 +27,10 @@ pageApp.post(
         pageData.pageBanner = `/uploads/${req.files.pageBanner[0].filename}`;
       }
 
+      // track creator
+      pageData.createdBy = req.admin.adminId;
+      pageData.createdOn = new Date();
+
       const newPage = new Page(pageData);
       const pageObj = await newPage.save();
 
@@ -40,15 +45,15 @@ pageApp.post(
 // Edit a page by pageId
 // -----------------------------
 pageApp.put(
-  "/page/:pageId",adminAuth,
+  "/page/:pageId",
+  adminAuth,
   upload.fields([
     { name: "pageImage", maxCount: 1 },
     { name: "pageBanner", maxCount: 1 },
   ]),
   expressAsyncHandler(async (req, res) => {
     try {
-      const modifiedPage = req.body;
-
+      const modifiedPage = { ...req.body };
       // If new files uploaded → overwrite paths
       if (req.files?.pageImage) {
         modifiedPage.pageImage = `/uploads/${req.files.pageImage[0].filename}`;
@@ -57,14 +62,16 @@ pageApp.put(
         modifiedPage.pageBanner = `/uploads/${req.files.pageBanner[0].filename}`;
       }
 
+      // audit info
+      modifiedPage.updatedBy = req.admin.adminId;
       modifiedPage.updatedOn = new Date();
 
       const latestPage = await Page.findOneAndUpdate(
         { pageId: Number(req.params.pageId) },
-        { ...modifiedPage },
+        modifiedPage,
         { new: true, runValidators: true }
       );
-
+      console.log("latestPage", latestPage);
       if (!latestPage) {
         return res.status(404).send({ message: "Page not found" });
       }
@@ -75,18 +82,17 @@ pageApp.put(
     }
   })
 );
+
 // -----------------------------
 // Get all pages
 // -----------------------------
 pageApp.get(
-  "/pages",adminAuth,
+  "/pages",
+  adminAuth,
   expressAsyncHandler(async (req, res) => {
     const pages = await Page.find();
     res.status(200).send({ message: "Pages list", payload: pages });
   })
 );
-
-
-
 
 module.exports = pageApp;

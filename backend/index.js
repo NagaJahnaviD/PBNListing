@@ -1,6 +1,7 @@
 //Note: maintaining commonJS code style for consistency
 
 const exp=require("express")
+const path = require("path");
 const app=exp()
 require('dotenv').config();
 const mongoose=require("mongoose");
@@ -51,6 +52,10 @@ app.use("/testimonial",testimonialApp)
 //configuration api
 const configurationApp=require("./APIs/configurationApi")
 app.use("/configuration",configurationApp)
+
+
+// Serve files inside the /uploads folder at the /uploads URL path
+app.use("/uploads", exp.static(path.join(__dirname, "uploads")));
 
 //error handler middleware
 

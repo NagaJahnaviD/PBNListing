@@ -7,7 +7,9 @@ function adminAuthMiddleware(req, res, next) {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.admin = decoded;
+    // req.admin = decoded;
+    req.admin = { adminId: decoded.adminId };
+
     next();
   } catch (err) {
     return res.status(403).json({ message: "Invalid or expired token" });

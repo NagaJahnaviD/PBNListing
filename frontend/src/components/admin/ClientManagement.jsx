@@ -12,71 +12,53 @@ function ClientManagement() {
   const navigate = useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
   // fetch all clients
   useEffect(() => {
-    axios
-      .get(`${apiBase}/client/clients`, { withCredentials: true })
-      .then((res) => setClients(res.data.payload || []))
-      .catch((err) => console.error(err));
-  }, []);
+    axios.get(`${apiBase}/client/clients`, { withCredentials: true })
+      .then(res => setClients(res.data.payload || []))
+      .catch(err => console.error("Failed to fetch clients:", err));
+  }, [apiBase]);
 
   // handle edit
   const handleEdit = (clientId) => {
-  setEditClient(true);
-  setEditClientId(clientId);
+    setEditClient(true);
+    setEditClientId(clientId);
 
-  const clientToEdit = clients.find((c) => c.clientId === clientId);
-  reset(clientToEdit);
+    const clientToEdit = clients.find(c => c.clientId === clientId);
+    if (!clientToEdit) return;
 
-  // image preview for already stored image
-  if (clientToEdit?.clientImage) {
-    setImagePreview(`${apiBase}${clientToEdit.clientImage}`);
-    console.log(`${apiBase}${clientToEdit.clientImage}`);
-  } else {
-    setImagePreview(null);
-  }
-};
+    reset(clientToEdit);
 
+    if (clientToEdit.clientImage) {
+      setImagePreview(`${apiBase}${clientToEdit.clientImage}`);
+    } else {
+      setImagePreview(null);
+    }
+  };
 
   // handle update
   const handleUpdate = async (data) => {
     try {
       const formData = new FormData();
 
-      Object.keys(data).forEach((key) => {
+      Object.keys(data).forEach(key => {
         if (key === "clientImage" && data[key] && data[key][0]) {
-          formData.append(key, data[key][0]); // file
-        } else if (
-          data[key] !== "" &&
-          data[key] !== "null" &&
-          data[key] !== null &&
-          data[key] !== undefined
-        ) {
+          formData.append(key, data[key][0]);
+        } else if (data[key] !== "" && data[key] !== "null" && data[key] !== null && data[key] !== undefined) {
           formData.append(key, data[key]);
         }
       });
 
-      const res = await axios.put(
-        `${apiBase}/client/client/${editClientId}`,
-        formData,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const res = await axios.put(`${apiBase}/client/client/${editClientId}`, formData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" }
+      });
 
       if (res.status === 200) {
         alert("Client updated successfully!");
-        const refreshed = await axios.get(`${apiBase}/client/clients`, {
-          withCredentials: true,
-        });
+        const refreshed = await axios.get(`${apiBase}/client/clients`, { withCredentials: true });
         setClients(refreshed.data.payload || []);
 
         setEditClient(false);
@@ -85,7 +67,7 @@ function ClientManagement() {
         reset({});
       }
     } catch (err) {
-      console.error(err);
+      console.error("Failed to update client:", err);
       alert("Failed to update client");
     }
   };
@@ -95,11 +77,7 @@ function ClientManagement() {
       {!editClient ? (
         <>
           <h2>Clients</h2>
-          <button
-            onClick={() =>
-              navigate("/admin/add-client", { state: { size: clients.length + 1 } })
-            }
-          >
+          <button onClick={() => navigate('/admin/add-client', { state: { size: clients.length + 1 } })}>
             Add Client
           </button>
 
@@ -115,21 +93,15 @@ function ClientManagement() {
               </tr>
             </thead>
             <tbody>
-              {clients.map((client) => (
-                <tr key={client.clientId}>
-                  <td>{client.clientId}</td>
-                  <td>{client.clientTitle}</td>
-                  <td>{client.clientLocation}</td>
-                  <td>{client.status}</td>
+              {clients.map(c => (
+                <tr key={c.clientId}>
+                  <td>{c.clientId}</td>
+                  <td>{c.clientTitle}</td>
+                  <td>{c.clientLocation}</td>
+                  <td>{c.status}</td>
+                  <td>{c.updatedOn ? new Date(c.updatedOn).toLocaleDateString() : "-"}</td>
                   <td>
-                    {client.updatedOn
-                      ? new Date(client.updatedOn).toLocaleDateString()
-                      : "-"}
-                  </td>
-                  <td>
-                    <button onClick={() => handleEdit(client.clientId)}>
-                      Edit
-                    </button>
+                    <button onClick={() => handleEdit(c.clientId)}>Edit</button>
                   </td>
                 </tr>
               ))}
@@ -145,62 +117,54 @@ function ClientManagement() {
             </div>
 
             <div>
-              <label>Title: </label>
+              <label>Title:</label>
+              <input type="text" {...register("clientTitle", { required: true })} />
+              {errors.clientTitle && <span>Required</span>}
+            </div>
+
+            <div>
+              <label>Description:</label>
+              <textarea {...register("clientDescription", { required: true })} />
+              {errors.clientDescription && <span>Required</span>}
+            </div>
+
+            <div>
+              <label>Location:</label>
+              <input type="text" {...register("clientLocation", { required: true })} />
+              {errors.clientLocation && <span>Required</span>}
+            </div>
+
+            <div>
+              <label>Image Upload (optional):</label>
               <input
-                type="text"
-                {...register("clientTitle", { required: true })}
+                type="file"
+                {...register("clientImage")}
+                onChange={(e) => {
+                  if (e.target.files && e.target.files[0]) {
+                    setImagePreview(URL.createObjectURL(e.target.files[0]));
+                  }
+                }}
               />
             </div>
 
+            {imagePreview && (
+              <div style={{ marginTop: "10px" }}>
+                <img
+                  src={imagePreview}
+                  alt="Client Preview"
+                  style={{ width: "150px", border: "1px solid #ccc", borderRadius: "4px" }}
+                />
+              </div>
+            )}
+
             <div>
-              <label>Description: </label>
-              <textarea
-                {...register("clientDescription", { required: true })}
-              />
+              <label>Client URL:</label>
+              <input type="text" {...register("clientUrl", { required: true })} />
+              {errors.clientUrl && <span>Required</span>}
             </div>
 
             <div>
-              <label>Location: </label>
-              <input
-                type="text"
-                {...register("clientLocation", { required: true })}
-              />
-            </div>
-
-            <div>
-  <label>Image Upload (optional): </label>
-  <input
-    type="file"
-    {...register("clientImage")}
-    onChange={(e) => {
-      if (e.target.files && e.target.files[0]) {
-        setImagePreview(URL.createObjectURL(e.target.files[0]));
-        // console.log(e);
-      }
-    }}
-  />
-</div>
-
-{imagePreview && (
-  <div style={{ marginTop: "10px" }}>
-    <img
-      src={imagePreview}
-      alt="Client Preview"
-      style={{ width: "150px", border: "1px solid #ccc", borderRadius: "4px" }}
-    />
-  </div>
-)}
-
-            <div>
-              <label>Client URL: </label>
-              <input
-                type="text"
-                {...register("clientUrl", { required: true })}
-              />
-            </div>
-
-            <div>
-              <label>Status: </label>
+              <label>Status:</label>
               <select {...register("status")}>
                 <option value="A">Active</option>
                 <option value="I">Inactive</option>

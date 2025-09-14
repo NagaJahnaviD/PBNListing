@@ -7,19 +7,14 @@ function BannerManagement() {
   const [banners, setBanners] = useState([]);
   const [editBanner, setEditBanner] = useState(false);
   const [editBannerId, setEditBannerId] = useState(null);
-  const navigate = useNavigate();
+  const [newImagePreview, setNewImagePreview] = useState(null);
 
+  const navigate = useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  // react-hook-form
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit, reset, setValue } = useForm();
 
-  // fetch all banners
+  // Fetch all banners
   useEffect(() => {
     axios
       .get(`${apiBase}/banner/banners`, { withCredentials: true })
@@ -27,24 +22,31 @@ function BannerManagement() {
       .catch((err) => console.error(err));
   }, []);
 
-  // handle edit click
+  // Handle file preview
+ const handleFilePreview = (e, setPreview) => {
+    const file = e.target.files[0];
+    if (file) setPreview(URL.createObjectURL(file));
+  };
+
+  // Handle edit click
   const handleEdit = (bannerId) => {
     setEditBanner(true);
     setEditBannerId(bannerId);
+    setNewImagePreview(null);
 
     const bannerToEdit = banners.find((b) => b.bannerId === bannerId);
-    reset(bannerToEdit); // fill form with existing values
+    reset(bannerToEdit);
   };
 
-  // handle update
+  // Handle update
   const handleUpdate = async (data) => {
     try {
       const formData = new FormData();
 
       Object.keys(data).forEach((key) => {
-        if (key === "bannerImage" && data.bannerImage && data.bannerImage[0]) {
-          formData.append("bannerImage", data.bannerImage[0]); // file
-        } else if (data[key] !== "" && data[key] !== "null" && data[key] !== null && data[key] !== undefined) {
+        if (key === "bannerImage" && data.bannerImage?.length > 0) {
+          formData.append("bannerImage", data.bannerImage[0]);
+        } else if (data[key] !== "" && data[key] !== null && data[key] !== undefined) {
           formData.append(key, data[key]);
         }
       });
@@ -60,13 +62,11 @@ function BannerManagement() {
 
       if (res.status === 200) {
         alert("Banner updated successfully!");
-        const refreshed = await axios.get(`${apiBase}/banner/banners`, {
-          withCredentials: true,
-        });
+        const refreshed = await axios.get(`${apiBase}/banner/banners`, { withCredentials: true });
         setBanners(refreshed.data.payload || []);
-
         setEditBanner(false);
         setEditBannerId(null);
+        setNewImagePreview(null);
         reset({});
       }
     } catch (err) {
@@ -114,9 +114,7 @@ function BannerManagement() {
                       : "-"}
                   </td>
                   <td>
-                    <button onClick={() => handleEdit(banner.bannerId)}>
-                      Edit
-                    </button>
+                    <button onClick={() => handleEdit(banner.bannerId)}>Edit</button>
                   </td>
                 </tr>
               ))}
@@ -133,22 +131,39 @@ function BannerManagement() {
 
             <div>
               <label>Title: </label>
-              <input
-                type="text"
-                {...register("bannerTitle", { required: true })}
-              />
+              <input type="text" {...register("bannerTitle", { required: true })} />
             </div>
 
             <div>
               <label>Content: </label>
-              <textarea
-                {...register("bannerContent", { required: true })}
-              />
+              <textarea {...register("bannerContent", { required: true })} />
             </div>
 
             <div>
               <label>Image Upload (optional): </label>
-              <input type="file" {...register("bannerImage")} />
+
+              {/* Existing image */}
+              {/* Existing image */}
+              {banners.find((b) => b.bannerId === editBannerId)?.bannerImage &&
+                !newImagePreview && (
+                  <img
+                    src={`${apiBase}${banners.find((b) => b.bannerId === editBannerId).bannerImage}`}
+                    alt="Current Banner"
+                    style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+                  />
+                )}
+
+
+              {/* New image preview */}
+              {newImagePreview && (
+                <img
+                  src={newImagePreview}
+                  alt="New Banner Preview"
+                  style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+                />
+              )}
+
+              <input type="file" {...register("bannerImage")} onChange={(e) => handleFilePreview(e, setNewImagePreview)} />
             </div>
 
             <div>
@@ -168,6 +183,7 @@ function BannerManagement() {
                 <option value="I">Inactive</option>
               </select>
             </div>
+
             <br />
             <button type="submit">Save</button>
             <button
@@ -175,6 +191,7 @@ function BannerManagement() {
               onClick={() => {
                 setEditBanner(false);
                 setEditBannerId(null);
+                setNewImagePreview(null);
                 reset({});
               }}
             >

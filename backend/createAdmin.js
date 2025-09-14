@@ -9,8 +9,9 @@ async function createAdmin() {
     await mongoose.connect(DBURL, { useNewUrlParser: true, useUnifiedTopology: true });
 
     const admin = new AdminAccount({
-      username: "admin",
-      email: "admin@example.com",
+      adminId: 2,
+      username: "admin1",
+      email: "admin1@example.com",
       password: "123456" // will be hashed automatically
     });
 

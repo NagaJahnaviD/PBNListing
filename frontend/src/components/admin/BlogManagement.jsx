@@ -7,9 +7,8 @@ function BlogManagement() {
   const [blogs, setBlogs] = useState([]);
   const [editBlog, setEditBlog] = useState(false);
   const [editBlogId, setEditBlogId] = useState(null);
-
-  const [imagePreview, setImagePreview] = useState(null);
-  const [bannerPreview, setBannerPreview] = useState(null);
+  const [newImagePreview, setNewImagePreview] = useState(null);
+  const [newBannerPreview, setNewBannerPreview] = useState(null);
 
   const navigate = useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -21,90 +20,62 @@ function BlogManagement() {
     formState: { errors },
   } = useForm();
 
-  // fetch all blogs
   useEffect(() => {
     axios
       .get(`${apiBase}/blog/blogs`, { withCredentials: true })
       .then((res) => setBlogs(res.data.payload || []))
       .catch((err) => console.error(err));
-  }, []);
+  }, [apiBase]);
 
-  // file change handler for preview
-  const handleFileChange = (e, setPreview) => {
+  const handleFilePreview = (e, setPreview) => {
     const file = e.target.files[0];
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-    }
+    if (file) setPreview(URL.createObjectURL(file));
   };
 
-  // handle edit
   const handleEdit = (blogId) => {
     setEditBlog(true);
     setEditBlogId(blogId);
+    setNewImagePreview(null);
+    setNewBannerPreview(null);
 
     const blogToEdit = blogs.find((b) => b.blogId === blogId);
 
-    // format date for <input type="date" />
     if (blogToEdit?.blogDate) {
-      blogToEdit.blogDate = new Date(blogToEdit.blogDate)
-        .toISOString()
-        .split("T")[0];
+      blogToEdit.blogDate = new Date(blogToEdit.blogDate).toISOString().split("T")[0];
     }
 
-    // set previews from DB
-    if (blogToEdit?.blogImage) {
-      setImagePreview(`${apiBase}${blogToEdit.blogImage}`);
-    }
-    if (blogToEdit?.blogBanner) {
-      setBannerPreview(`${apiBase}${blogToEdit.blogBanner}`);
-    }
-
-    reset(blogToEdit);
+    reset({
+      ...blogToEdit,
+      blogImage: "",
+      blogBanner: "",
+    });
   };
 
-  // handle update
   const handleUpdate = async (data) => {
     try {
       const formData = new FormData();
 
       Object.keys(data).forEach((key) => {
-        if (
-          (key === "blogImage" || key === "blogBanner") &&
-          data[key] &&
-          data[key][0]
-        ) {
-          formData.append(key, data[key][0]); // files
-        } else if (
-          data[key] !== "" &&
-          data[key] !== "null" &&
-          data[key] !== null &&
-          data[key] !== undefined
-        ) {
+        if ((key === "blogImage" || key === "blogBanner") && data[key] && data[key][0]) {
+          formData.append(key, data[key][0]);
+        } else if (data[key] !== "" && data[key] !== null && data[key] !== undefined) {
           formData.append(key, data[key]);
         }
       });
 
-      const res = await axios.put(
-        `${apiBase}/blog/blog/${editBlogId}`,
-        formData,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const res = await axios.put(`${apiBase}/blog/blog/${editBlogId}`, formData, {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
       if (res.status === 200) {
         alert("Blog updated successfully!");
-        const refreshed = await axios.get(`${apiBase}/blog/blogs`, {
-          withCredentials: true,
-        });
+        const refreshed = await axios.get(`${apiBase}/blog/blogs`, { withCredentials: true });
         setBlogs(refreshed.data.payload || []);
-
-        // reset state
         setEditBlog(false);
         setEditBlogId(null);
-        setImagePreview(null);
-        setBannerPreview(null);
+        setNewImagePreview(null);
+        setNewBannerPreview(null);
         reset({});
       }
     } catch (err) {
@@ -118,16 +89,9 @@ function BlogManagement() {
       {!editBlog ? (
         <>
           <h2>Blogs</h2>
-          <button
-            onClick={() =>
-              navigate("/admin/add-blog", {
-                state: { size: blogs.length + 1 },
-              })
-            }
-          >
+          <button onClick={() => navigate("/admin/add-blog", { state: { size: blogs.length + 1 } })}>
             Add Blog
           </button>
-
           <table border="1" cellPadding="8" cellSpacing="0">
             <thead>
               <tr>
@@ -145,18 +109,10 @@ function BlogManagement() {
                 <tr key={blog.blogId}>
                   <td>{blog.blogId}</td>
                   <td>{blog.blogTitle}</td>
-                  <td>
-                    {blog.blogDate
-                      ? new Date(blog.blogDate).toLocaleDateString()
-                      : "-"}
-                  </td>
+                  <td>{blog.blogDate ? new Date(blog.blogDate).toLocaleDateString() : "-"}</td>
                   <td>{blog.blogAuthor}</td>
                   <td>{blog.status}</td>
-                  <td>
-                    {blog.updatedOn
-                      ? new Date(blog.updatedOn).toLocaleDateString()
-                      : "-"}
-                  </td>
+                  <td>{blog.updatedOn ? new Date(blog.updatedOn).toLocaleDateString() : "-"}</td>
                   <td>
                     <button onClick={() => handleEdit(blog.blogId)}>Edit</button>
                   </td>
@@ -175,18 +131,12 @@ function BlogManagement() {
 
             <div>
               <label>Title: </label>
-              <input
-                type="text"
-                {...register("blogTitle", { required: true })}
-              />
+              <input type="text" {...register("blogTitle", { required: true })} />
             </div>
 
             <div>
               <label>Date: </label>
-              <input
-                type="date"
-                {...register("blogDate", { required: true })}
-              />
+              <input type="date" {...register("blogDate", { required: true })} />
             </div>
 
             <div>
@@ -194,40 +144,48 @@ function BlogManagement() {
               <textarea {...register("blogDescription", { required: true })} />
             </div>
 
+            {/* Blog Image Preview */}
             <div>
-              <label>Image Upload (optional): </label>
-              <input
-                type="file"
-                {...register("blogImage")}
-                onChange={(e) => handleFileChange(e, setImagePreview)}
-              />
-              {imagePreview && (
-                <div>
-                  <img
-                    src={imagePreview}
-                    alt="Blog"
-                    style={{ width: "150px", marginTop: "10px" }}
-                  />
-                </div>
-              )}
+              <label>Blog Image (optional): </label>
+              {/* Existing blog image preview */}
+{blogs.find(b => b.blogId === editBlogId)?.blogImage && !newImagePreview && (
+  <img
+    src={`${apiBase}${blogs.find(b => b.blogId === editBlogId).blogImage}`}
+    alt="Current Blog"
+    style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+  />
+)}
+
+{/* New image preview */}
+{newImagePreview && (
+  <img
+    src={newImagePreview}
+    alt="New Blog Preview"
+    style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+  />
+)}
+              <input type="file" {...register("blogImage")} onChange={(e) => handleFilePreview(e, setNewImagePreview)} />
             </div>
 
+            {/* Blog Banner Preview */}
             <div>
-              <label>Banner Upload (optional): </label>
-              <input
-                type="file"
-                {...register("blogBanner")}
-                onChange={(e) => handleFileChange(e, setBannerPreview)}
-              />
-              {bannerPreview && (
-                <div>
-                  <img
-                    src={bannerPreview}
-                    alt="Banner"
-                    style={{ width: "150px", marginTop: "10px" }}
-                  />
-                </div>
+              <label>Blog Banner (optional): </label>
+              {blogs.find(b => b.blogId === editBlogId)?.blogBanner && !newBannerPreview && (
+                <img
+                  src={`${apiBase}${blogs.find(b => b.blogId === editBlogId).blogBanner}`}
+                  alt="Current Banner"
+                  style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+                />
               )}
+              {
+              newBannerPreview && (
+                <img
+                  src={newBannerPreview}
+                  alt="New Banner Preview"
+                  style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+                />
+              )}
+              <input type="file" {...register("blogBanner")} onChange={(e) => handleFilePreview(e, setNewBannerPreview)} />
             </div>
 
             <div>
@@ -247,6 +205,7 @@ function BlogManagement() {
                 <option value="I">Inactive</option>
               </select>
             </div>
+
             <br />
             <button type="submit">Save</button>
             <button
@@ -254,8 +213,8 @@ function BlogManagement() {
               onClick={() => {
                 setEditBlog(false);
                 setEditBlogId(null);
-                setImagePreview(null);
-                setBannerPreview(null);
+                setNewImagePreview(null);
+                setNewBannerPreview(null);
                 reset({});
               }}
             >

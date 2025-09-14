@@ -27,7 +27,7 @@ adminApp.post(
     }
 
     const token = jwt.sign(
-      { id: admin._id, username: admin.username },
+      {adminId: admin.adminId, username: admin.username },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -57,8 +57,8 @@ adminApp.post(
   expressAsyncHandler(async (req, res) => {
     const { oldPassword, newPassword } = req.body;
 
-    const admin = await AdminAccount.findById(req.admin.id);
-    if (!admin) {
+const admin = await AdminAccount.findOne({ adminId: req.admin.adminId });
+ if (!admin) {
       return res.status(404).send({ message: "Admin not found" });
     }
 

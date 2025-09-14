@@ -1,43 +1,47 @@
-import React from 'react'
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function AddTestimonial() {
+  const [imagePreview, setImagePreview] = useState(null); // 1️⃣ state for preview
+
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const location = useLocation();
   const navigate = useNavigate();
   const { size } = location.state || {};
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
+  // 2️⃣ handle file selection for preview
+  const handleFilePreview = (e) => {
+    const file = e.target.files[0];
+    if (file) setImagePreview(URL.createObjectURL(file));
+  };
+
   const handleAdd = async (data) => {
     const formData = new FormData();
     try {
       Object.keys(data).forEach((key) => {
         if (key === "testimonialImage" && data.testimonialImage && data.testimonialImage[0]) {
-          formData.append("testimonialImage", data.testimonialImage[0]); // file
+          formData.append("testimonialImage", data.testimonialImage[0]);
         } else if (data[key] !== "" && data[key] !== null && data[key] !== undefined) {
           formData.append(key, data[key]);
         }
       });
 
-      // Always overwrite testimonialId from state
       formData.set("testimonialId", size);
 
-      console.log("Form Data Entries:");
-      for (let pair of formData.entries()) {
-        console.log(`${pair[0]}: ${pair[1]}`);
-      }
-
-      const res = await axios.post(`${apiBase}/testimonial/testimonial`,
+      const res = await axios.post(
+        `${apiBase}/testimonial/testimonial`,
         formData,
-        { withCredentials: true,headers: { "Content-Type": "multipart/form-data" } }
+        { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
       );
 
       if (res.status === 201) {
         alert("Testimonial created successfully");
-        navigate('/admin/testimonial-list');
         reset({});
+        setImagePreview(null); // clear preview
+        navigate("/admin/testimonial-list");
       }
     } catch (err) {
       console.error(err);
@@ -90,9 +94,23 @@ function AddTestimonial() {
           <input type="number" min="1" max="5" {...register("reviewValue", { required: true })} />
         </div>
 
-        <div>
+         <div>
           <label>Image Upload (optional): </label>
-          <input type="file" {...register("testimonialImage")} />
+
+          {/* 3️⃣ display image preview */}
+          {imagePreview && (
+            <img
+              src={imagePreview}
+              alt="Testimonial Preview"
+              style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+            />
+          )}
+
+          <input
+            type="file"
+            {...register("testimonialImage")}
+            onChange={handleFilePreview} // attach preview handler
+          />
         </div>
 
         <div>
