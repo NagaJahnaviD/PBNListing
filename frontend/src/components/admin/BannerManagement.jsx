@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Editor from "./Editor"; // ✅ import the rich text editor
 
 function BannerManagement() {
   const [banners, setBanners] = useState([]);
   const [editBanner, setEditBanner] = useState(false);
   const [editBannerId, setEditBannerId] = useState(null);
   const [newImagePreview, setNewImagePreview] = useState(null);
+  const [bannerContent, setBannerContent] = useState(""); // ✅ editor state
 
   const navigate = useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -20,25 +22,28 @@ function BannerManagement() {
       .get(`${apiBase}/banner/banners`, { withCredentials: true })
       .then((res) => setBanners(res.data.payload || []))
       .catch((err) => console.error(err));
-  }, []);
+  }, [apiBase]);
 
-  // Handle file preview
- const handleFilePreview = (e, setPreview) => {
+  // Preview selected file
+  const handleFilePreview = (e, setPreview) => {
     const file = e.target.files[0];
     if (file) setPreview(URL.createObjectURL(file));
   };
 
-  // Handle edit click
+  // Edit button click
   const handleEdit = (bannerId) => {
     setEditBanner(true);
     setEditBannerId(bannerId);
     setNewImagePreview(null);
 
     const bannerToEdit = banners.find((b) => b.bannerId === bannerId);
+    if (!bannerToEdit) return;
+
     reset(bannerToEdit);
+    setBannerContent(bannerToEdit.bannerContent || ""); // ✅ load existing content into editor
   };
 
-  // Handle update
+  // Save updates
   const handleUpdate = async (data) => {
     try {
       const formData = new FormData();
@@ -50,6 +55,8 @@ function BannerManagement() {
           formData.append(key, data[key]);
         }
       });
+
+      formData.set("bannerContent", bannerContent); // ✅ include editor content
 
       const res = await axios.put(
         `${apiBase}/banner/banner/${editBannerId}`,
@@ -64,9 +71,12 @@ function BannerManagement() {
         alert("Banner updated successfully!");
         const refreshed = await axios.get(`${apiBase}/banner/banners`, { withCredentials: true });
         setBanners(refreshed.data.payload || []);
+
+        // reset editor & form
         setEditBanner(false);
         setEditBannerId(null);
         setNewImagePreview(null);
+        setBannerContent("");
         reset({});
       }
     } catch (err) {
@@ -105,7 +115,14 @@ function BannerManagement() {
                 <tr key={banner.bannerId}>
                   <td>{banner.bannerId}</td>
                   <td>{banner.bannerTitle}</td>
-                  <td>{banner.bannerContent}</td>
+                  <td>
+                    {/* Show a shortened preview to avoid huge HTML */}
+                    <div
+                      dangerouslySetInnerHTML={{
+                        __html: banner.bannerContent?.slice(0, 100) + "...",
+                      }}
+                    />
+                  </td>
                   <td>{banner.status}</td>
                   <td>{banner.bannerVisibility ? "Yes" : "No"}</td>
                   <td>
@@ -136,13 +153,13 @@ function BannerManagement() {
 
             <div>
               <label>Content: </label>
-              <textarea {...register("bannerContent", { required: true })} />
+              {/* ✅ Rich text editor instead of textarea */}
+              <Editor value={bannerContent} onChange={setBannerContent} apiBase={apiBase} />
             </div>
 
             <div>
               <label>Image Upload (optional): </label>
 
-              {/* Existing image */}
               {/* Existing image */}
               {banners.find((b) => b.bannerId === editBannerId)?.bannerImage &&
                 !newImagePreview && (
@@ -153,8 +170,7 @@ function BannerManagement() {
                   />
                 )}
 
-
-              {/* New image preview */}
+              {/* New preview */}
               {newImagePreview && (
                 <img
                   src={newImagePreview}
@@ -163,7 +179,11 @@ function BannerManagement() {
                 />
               )}
 
-              <input type="file" {...register("bannerImage")} onChange={(e) => handleFilePreview(e, setNewImagePreview)} />
+              <input
+                type="file"
+                {...register("bannerImage")}
+                onChange={(e) => handleFilePreview(e, setNewImagePreview)}
+              />
             </div>
 
             <div>
@@ -192,6 +212,7 @@ function BannerManagement() {
                 setEditBanner(false);
                 setEditBannerId(null);
                 setNewImagePreview(null);
+                setBannerContent(""); // ✅ clear editor
                 reset({});
               }}
             >

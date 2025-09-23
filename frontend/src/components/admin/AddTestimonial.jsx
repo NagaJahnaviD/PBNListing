@@ -2,9 +2,11 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Editor from "./Editor"
 
 function AddTestimonial() {
   const [imagePreview, setImagePreview] = useState(null); // 1️⃣ state for preview
+    const [testimonialDescription, setTestimonialDescription] = useState("");
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const location = useLocation();
@@ -30,6 +32,7 @@ function AddTestimonial() {
       });
 
       formData.set("testimonialId", size);
+      formData.set("testimonialDescription", testimonialDescription);
 
       const res = await axios.post(
         `${apiBase}/testimonial/testimonial`,
@@ -76,7 +79,8 @@ function AddTestimonial() {
 
         <div>
           <label>Description: </label>
-          <textarea {...register("testimonialDescription", { required: true })} />
+          <Editor value={testimonialDescription} onChange={setTestimonialDescription} apiBase={apiBase} />
+
         </div>
 
         <div>

@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Editor from "./Editor";
 
 function BlockManagement() {
   const [blocks, setBlocks] = useState([]);
   const [editBlock, setEditBlock] = useState(false);
   const [editBlockId, setEditBlockId] = useState(null);
   const [newImagePreview, setNewImagePreview] = useState(null);
+  const [editBlockContent, setEditBlockContent] = useState("");
 
   const navigate = useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -41,6 +43,7 @@ function BlockManagement() {
 
     const blockToEdit = blocks.find((b) => b.blockId === blockId);
     reset(blockToEdit);
+    setEditBlockContent(blockToEdit.blockContent || "");
   };
 
   // Handle update
@@ -55,6 +58,9 @@ function BlockManagement() {
           formData.append(key, data[key]);
         }
       });
+
+      // Include editor content
+      formData.set("blockContent", editBlockContent);
 
       const res = await axios.put(
         `${apiBase}/block/block/${editBlockId}`,
@@ -75,6 +81,7 @@ function BlockManagement() {
         setEditBlock(false);
         setEditBlockId(null);
         setNewImagePreview(null);
+        setEditBlockContent("");
         reset({});
       }
     } catch (err) {
@@ -148,8 +155,12 @@ function BlockManagement() {
             </div>
 
             <div>
-              <label>Content: </label>
-              <textarea {...register("blockContent", { required: true })} />
+              <label>Content:</label>
+              <Editor
+                value={editBlockContent}
+                onChange={setEditBlockContent}
+                apiBase={apiBase}
+              />
             </div>
 
             {/* Block Image Preview */}
@@ -208,6 +219,7 @@ function BlockManagement() {
                 setEditBlock(false);
                 setEditBlockId(null);
                 setNewImagePreview(null);
+                setEditBlockContent("");
                 reset({});
               }}
             >

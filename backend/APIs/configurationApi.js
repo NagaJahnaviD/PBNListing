@@ -16,10 +16,19 @@ configurationApp.put(
   expressAsyncHandler(async (req, res) => {
     const modifiedConfiguration = {
       ...req.body,
-      // 👇 add audit info from token
       updatedBy: req.admin.adminId,
       updatedOn: new Date()
     };
+
+    // Handle uploaded files
+    if (req.files) {
+      if (req.files.headerLogo && req.files.headerLogo[0]) {
+        modifiedConfiguration.headerLogo = `/uploads/${req.files.headerLogo[0].filename}`;
+      }
+      if (req.files.footerLogo && req.files.footerLogo[0]) {
+        modifiedConfiguration.footerLogo = `/uploads/${req.files.footerLogo[0].filename}`;
+      }
+    }
 
     const latestConfiguration = await Configuration.findOneAndUpdate(
       { configId: req.params.configId },

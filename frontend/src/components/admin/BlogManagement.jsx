@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 function BlogManagement() {
   const [blogs, setBlogs] = useState([]);
@@ -9,6 +11,7 @@ function BlogManagement() {
   const [editBlogId, setEditBlogId] = useState(null);
   const [newImagePreview, setNewImagePreview] = useState(null);
   const [newBannerPreview, setNewBannerPreview] = useState(null);
+  const [editorValue, setEditorValue] = useState(""); // <-- state for Quill content
 
   const navigate = useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -17,6 +20,7 @@ function BlogManagement() {
     register,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm();
 
@@ -44,6 +48,9 @@ function BlogManagement() {
       blogToEdit.blogDate = new Date(blogToEdit.blogDate).toISOString().split("T")[0];
     }
 
+    // Set Quill editor value separately
+    setEditorValue(blogToEdit.blogDescription || "");
+
     reset({
       ...blogToEdit,
       blogImage: "",
@@ -55,10 +62,18 @@ function BlogManagement() {
     try {
       const formData = new FormData();
 
+      // Attach editor content to formData
+      formData.append("blogDescription", editorValue);
+
       Object.keys(data).forEach((key) => {
         if ((key === "blogImage" || key === "blogBanner") && data[key] && data[key][0]) {
           formData.append(key, data[key][0]);
-        } else if (data[key] !== "" && data[key] !== null && data[key] !== undefined) {
+        } else if (
+          key !== "blogDescription" && // avoid duplicate
+          data[key] !== "" &&
+          data[key] !== null &&
+          data[key] !== undefined
+        ) {
           formData.append(key, data[key]);
         }
       });
@@ -77,6 +92,7 @@ function BlogManagement() {
         setNewImagePreview(null);
         setNewBannerPreview(null);
         reset({});
+        setEditorValue("");
       }
     } catch (err) {
       console.error(err);
@@ -139,31 +155,34 @@ function BlogManagement() {
               <input type="date" {...register("blogDate", { required: true })} />
             </div>
 
+            {/* Rich-text editor for description */}
             <div>
               <label>Description: </label>
-              <textarea {...register("blogDescription", { required: true })} />
+              <ReactQuill
+                theme="snow"
+                value={editorValue}
+                onChange={setEditorValue}
+                style={{ height: "250px", marginBottom: "40px" }}
+              />
             </div>
 
             {/* Blog Image Preview */}
             <div>
               <label>Blog Image (optional): </label>
-              {/* Existing blog image preview */}
-{blogs.find(b => b.blogId === editBlogId)?.blogImage && !newImagePreview && (
-  <img
-    src={`${apiBase}${blogs.find(b => b.blogId === editBlogId).blogImage}`}
-    alt="Current Blog"
-    style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
-  />
-)}
-
-{/* New image preview */}
-{newImagePreview && (
-  <img
-    src={newImagePreview}
-    alt="New Blog Preview"
-    style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
-  />
-)}
+              {blogs.find(b => b.blogId === editBlogId)?.blogImage && !newImagePreview && (
+                <img
+                  src={`${apiBase}${blogs.find(b => b.blogId === editBlogId).blogImage}`}
+                  alt="Current Blog"
+                  style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+                />
+              )}
+              {newImagePreview && (
+                <img
+                  src={newImagePreview}
+                  alt="New Blog Preview"
+                  style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+                />
+              )}
               <input type="file" {...register("blogImage")} onChange={(e) => handleFilePreview(e, setNewImagePreview)} />
             </div>
 
@@ -177,8 +196,7 @@ function BlogManagement() {
                   style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
                 />
               )}
-              {
-              newBannerPreview && (
+              {newBannerPreview && (
                 <img
                   src={newBannerPreview}
                   alt="New Banner Preview"
@@ -215,6 +233,7 @@ function BlogManagement() {
                 setEditBlogId(null);
                 setNewImagePreview(null);
                 setNewBannerPreview(null);
+                setEditorValue("");
                 reset({});
               }}
             >

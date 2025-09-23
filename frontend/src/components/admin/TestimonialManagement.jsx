@@ -2,12 +2,14 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Editor from "./Editor"; // ✅ import your rich text editor
 
 function TestimonialManagement() {
   const [testimonials, setTestimonials] = useState([]);
   const [editTestimonial, setEditTestimonial] = useState(false);
   const [editTestimonialId, setEditTestimonialId] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [testimonialDescription, setTestimonialDescription] = useState(""); // ✅ state for editor
 
   const navigate = useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
@@ -16,7 +18,8 @@ function TestimonialManagement() {
 
   // fetch all testimonials
   useEffect(() => {
-    axios.get(`${apiBase}/testimonial/testimonials`, { withCredentials: true })
+    axios
+      .get(`${apiBase}/testimonial/testimonials`, { withCredentials: true })
       .then((res) => setTestimonials(res.data.payload || []))
       .catch((err) => console.error("Failed to fetch testimonials:", err));
   }, [apiBase]);
@@ -32,16 +35,20 @@ function TestimonialManagement() {
     setEditTestimonial(true);
     setEditTestimonialId(testimonialId);
 
-    const testimonialToEdit = testimonials.find(t => t.testimonialId === testimonialId);
+    const testimonialToEdit = testimonials.find(
+      (t) => t.testimonialId === testimonialId
+    );
     if (!testimonialToEdit) return;
+
+    // prefill form + editor
+    reset(testimonialToEdit);
+    setTestimonialDescription(testimonialToEdit.testimonialDescription || "");
 
     if (testimonialToEdit.testimonialImage) {
       setImagePreview(`${apiBase}${testimonialToEdit.testimonialImage}`);
     } else {
       setImagePreview(null);
     }
-
-    reset(testimonialToEdit);
   };
 
   // handle update
@@ -52,25 +59,40 @@ function TestimonialManagement() {
       Object.keys(data).forEach((key) => {
         if (key === "testimonialImage" && data[key] && data[key][0]) {
           formData.append("testimonialImage", data[key][0]);
-        } else if (data[key] !== "" && data[key] !== "null" && data[key] !== null && data[key] !== undefined) {
+        } else if (
+          data[key] !== "" &&
+          data[key] !== "null" &&
+          data[key] !== null &&
+          data[key] !== undefined
+        ) {
           formData.append(key, data[key]);
         }
       });
 
+      // ✅ add editor content explicitly
+      formData.set("testimonialDescription", testimonialDescription);
+
       const res = await axios.put(
         `${apiBase}/testimonial/testimonial/${editTestimonialId}`,
         formData,
-        { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
+        {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        }
       );
 
       if (res.status === 200) {
         alert("Testimonial updated successfully!");
-        const refreshed = await axios.get(`${apiBase}/testimonial/testimonials`, { withCredentials: true });
+        const refreshed = await axios.get(
+          `${apiBase}/testimonial/testimonials`,
+          { withCredentials: true }
+        );
         setTestimonials(refreshed.data.payload || []);
 
         setEditTestimonial(false);
         setEditTestimonialId(null);
         setImagePreview(null);
+        setTestimonialDescription("");
         reset({});
       }
     } catch (err) {
@@ -84,7 +106,13 @@ function TestimonialManagement() {
       {!editTestimonial ? (
         <>
           <h2>Testimonials</h2>
-          <button onClick={() => navigate('/admin/add-testimonial', { state: { size: testimonials.length + 1 } })}>
+          <button
+            onClick={() =>
+              navigate("/admin/add-testimonial", {
+                state: { size: testimonials.length + 1 },
+              })
+            }
+          >
             Add Testimonial
           </button>
 
@@ -97,12 +125,18 @@ function TestimonialManagement() {
               </tr>
             </thead>
             <tbody>
-              {testimonials.map(t => (
+              {testimonials.map((t) => (
                 <tr key={t.testimonialId}>
                   <td>{t.testimonialAuthor}</td>
-                  <td>{t.updatedOn ? new Date(t.updatedOn).toLocaleDateString() : "-"}</td>
                   <td>
-                    <button onClick={() => handleEdit(t.testimonialId)}>Edit</button>
+                    {t.updatedOn
+                      ? new Date(t.updatedOn).toLocaleDateString()
+                      : "-"}
+                  </td>
+                  <td>
+                    <button onClick={() => handleEdit(t.testimonialId)}>
+                      Edit
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -119,28 +153,47 @@ function TestimonialManagement() {
 
             <div>
               <label>Title:</label>
-              <input type="text" {...register("testimonialTitle", { required: true })} />
+              <input
+                type="text"
+                {...register("testimonialTitle", { required: true })}
+              />
               {errors.testimonialTitle && <span>Required</span>}
             </div>
 
             <div>
               <label>Author:</label>
-              <input type="text" {...register("testimonialAuthor", { required: true })} />
+              <input
+                type="text"
+                {...register("testimonialAuthor", { required: true })}
+              />
               {errors.testimonialAuthor && <span>Required</span>}
             </div>
 
             <div>
               <label>Description:</label>
-              <textarea {...register("testimonialDescription", { required: true })} />
+              {/* ✅ Replace textarea with Editor */}
+              <Editor
+                value={testimonialDescription}
+                onChange={setTestimonialDescription}
+                apiBase={apiBase}
+              />
               {errors.testimonialDescription && <span>Required</span>}
             </div>
 
             <div>
               <label>Image Upload (optional):</label>
-              <input type="file" {...register("testimonialImage")} onChange={handleFileChange} />
+              <input
+                type="file"
+                {...register("testimonialImage")}
+                onChange={handleFileChange}
+              />
               {imagePreview && (
                 <div>
-                  <img src={imagePreview} alt="Preview" style={{ width: "150px", marginTop: "10px" }} />
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    style={{ width: "150px", marginTop: "10px" }}
+                  />
                 </div>
               )}
             </div>
@@ -161,6 +214,7 @@ function TestimonialManagement() {
                 setEditTestimonial(false);
                 setEditTestimonialId(null);
                 setImagePreview(null);
+                setTestimonialDescription("");
                 reset({});
               }}
             >

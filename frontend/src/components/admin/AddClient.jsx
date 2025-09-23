@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Editor from "./Editor"
 
 function AddClient() {
+  const [clientDescription, setClientDescription] = useState("");
   const [imagePreview, setImagePreview] = useState(null); // 1️⃣ preview state
 
   const {
@@ -66,7 +68,8 @@ function AddClient() {
 
         <div>
           <label>Description: </label>
-          <textarea {...register("clientDescription", { required: true })} />
+          <Editor value={clientDescription} onChange={setClientDescription} apiBase={apiBase} />
+
         </div>
 
         <div>

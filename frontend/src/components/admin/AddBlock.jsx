@@ -1,10 +1,12 @@
 import React, { useState } from 'react'
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import Editor from "./Editor"
+import { useRef } from 'react';
 function AddBlock() {
+  const quillRef = useRef();
+  const [blockContent, setBlockContent] = useState("");
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const location = useLocation();
   const navigate = useNavigate();
@@ -26,12 +28,13 @@ function AddBlock() {
       Object.keys(data).forEach((key) => {
         if (key === "blockImage" && data.blockImage && data.blockImage[0]) {
           formData.append("blockImage", data.blockImage[0]); // file
-        } else {
+        } 
+        else {
           formData.append(key, data[key]);
         }
       });
       formData.set("blockId", size);
-
+      formData.set("blockContent", blockContent);
       const res = await axios.post(`${apiBase}/block/block`,
         formData,
         { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
@@ -65,8 +68,9 @@ function AddBlock() {
         </div>
 
         <div>
-          <label>Content: </label>
-          <textarea {...register("blockContent", { required: true })} />
+          <label>Content:</label>
+          <Editor value={blockContent} onChange={setBlockContent} apiBase={apiBase} />
+
         </div>
 
         {/* Block Image Preview */}

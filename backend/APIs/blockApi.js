@@ -12,8 +12,8 @@ blockApp.post(
   upload.single("blockImage"),
   expressAsyncHandler(async (req, res) => {
     try {
+      
       const blockData = req.body;
-
       // If file uploaded → save path
       if (req.file) {
         blockData.blockImage = `/uploads/${req.file.filename}`;

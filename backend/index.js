@@ -14,7 +14,7 @@ app.use(cors({
   credentials: true, // allow cookies
 }));
 
-//db conn
+//db
 mongoose.connect(process.env.DBURL)
 .then(app.listen(port,()=>console.log(`server listening on port ${port}...`)))
 .catch(err=>console.log("error in DB connection",err))
@@ -56,6 +56,10 @@ app.use("/configuration",configurationApp)
 
 // Serve files inside the /uploads folder at the /uploads URL path
 app.use("/uploads", exp.static(path.join(__dirname, "uploads")));
+
+
+const editorApp = require("./APIs/EditorApi");
+app.use("/editor", editorApp);
 
 //error handler middleware
 

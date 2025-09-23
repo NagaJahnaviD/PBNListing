@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
 
 function Index() {
   const [pages, setPages] = useState([]);
@@ -10,15 +12,15 @@ function Index() {
   const [newImagePreview, setNewImagePreview] = useState(null);
   const [newBannerPreview, setNewBannerPreview] = useState(null);
 
+  // editor states
+  const [contentValue, setContentValue] = useState("");
+  const [topContentValue, setTopContentValue] = useState("");
+  const [bottomContentValue, setBottomContentValue] = useState("");
+
   const navigate = useNavigate();
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm();
+  const { register, handleSubmit, reset } = useForm();
 
   // Fetch all pages
   useEffect(() => {
@@ -37,7 +39,11 @@ function Index() {
 
     const pageToEdit = pages.find((p) => p.pageId === pageId);
 
-    // Reset form fields
+    // Set editor content separately
+    setContentValue(pageToEdit.pageContent || "");
+    setTopContentValue(pageToEdit.pageTopContent || "");
+    setBottomContentValue(pageToEdit.pageBottomContent || "");
+
     reset({
       ...pageToEdit,
       pageImage: "",
@@ -61,10 +67,20 @@ function Index() {
     try {
       const formData = new FormData();
 
+      // Add editor fields
+      formData.append("pageContent", contentValue);
+      formData.append("pageTopContent", topContentValue);
+      formData.append("pageBottomContent", bottomContentValue);
+
       Object.keys(data).forEach((key) => {
         if ((key === "pageImage" || key === "pageBanner") && data[key] && data[key][0]) {
           formData.append(key, data[key][0]);
-        } else if (data[key] !== "" && data[key] !== null && data[key] !== undefined) {
+        } else if (
+          !["pageContent", "pageTopContent", "pageBottomContent"].includes(key) &&
+          data[key] !== "" &&
+          data[key] !== null &&
+          data[key] !== undefined
+        ) {
           formData.append(key, data[key]);
         }
       });
@@ -85,6 +101,9 @@ function Index() {
         setNewImagePreview(null);
         setNewBannerPreview(null);
         reset({});
+        setContentValue("");
+        setTopContentValue("");
+        setBottomContentValue("");
       }
     } catch (err) {
       console.error(err);
@@ -151,12 +170,26 @@ function Index() {
               <input type="text" {...register("bannerCaption", { required: true })} />
             </div>
 
+            {/* Rich Text Editors */}
             <div>
               <label>Content: </label>
-              <textarea {...register("pageContent", { required: true })} />
+              <ReactQuill theme="snow" value={contentValue} onChange={setContentValue}
+                style={{ height: "200px", marginBottom: "40px" }} />
             </div>
 
-            <div>
+            <div className="pt-5">
+              <label>Page Top Content: </label>
+              <ReactQuill theme="snow" value={topContentValue} onChange={setTopContentValue}
+                style={{ height: "200px", marginBottom: "40px" }} />
+            </div>
+
+            <div className="pt-5">
+              <label>Page Bottom Content: </label>
+              <ReactQuill theme="snow" value={bottomContentValue} onChange={setBottomContentValue}
+                style={{ height: "200px", marginBottom: "40px" }} />
+            </div>
+
+            <div className="pt-5">
               <label>Page URL: </label>
               <input type="text" {...register("pageUrl", { required: true })} />
             </div>
@@ -164,7 +197,6 @@ function Index() {
             {/* Page Banner with preview */}
             <div>
               <label>Page Banner (optional): </label>
-              {/* Existing banner preview */}
               {pages.find(p => p.pageId === editPageId)?.pageBanner && !newBannerPreview && (
                 <img
                   src={`${apiBase}${pages.find(p => p.pageId === editPageId).pageBanner}`}
@@ -172,7 +204,6 @@ function Index() {
                   style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
                 />
               )}
-              {/* New banner preview */}
               {newBannerPreview && (
                 <img
                   src={newBannerPreview}
@@ -186,7 +217,6 @@ function Index() {
             {/* Page Image with preview */}
             <div>
               <label>Page Image (optional): </label>
-              {/* Existing image preview */}
               {pages.find(p => p.pageId === editPageId)?.pageImage && !newImagePreview && (
                 <img
                   src={`${apiBase}${pages.find(p => p.pageId === editPageId).pageImage}`}
@@ -194,7 +224,6 @@ function Index() {
                   style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
                 />
               )}
-              {/* New image preview */}
               {newImagePreview && (
                 <img
                   src={newImagePreview}
@@ -203,16 +232,6 @@ function Index() {
                 />
               )}
               <input type="file" {...register("pageImage")} onChange={handleImagePreview} />
-            </div>
-
-            <div>
-              <label>Page Top Content: </label>
-              <textarea {...register("pageTopContent")} />
-            </div>
-
-            <div>
-              <label>Page Bottom Content: </label>
-              <textarea {...register("pageBottomContent")} />
             </div>
 
             <div>
@@ -273,6 +292,9 @@ function Index() {
                 setEditPageId(null);
                 setNewImagePreview(null);
                 setNewBannerPreview(null);
+                setContentValue("");
+                setTopContentValue("");
+                setBottomContentValue("");
                 reset({});
               }}
             >

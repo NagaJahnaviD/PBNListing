@@ -2,8 +2,10 @@ import React, { useState } from 'react'
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Editor from "./Editor"
 
 function AddBlog() {
+  const [blogDescription, setBlogDescription] = useState("");
   const [blogImagePreview, setBlogImagePreview] = useState(null);
   const [blogBannerPreview, setBlogBannerPreview] = useState(null);
 
@@ -30,6 +32,7 @@ function AddBlog() {
         }
       });
       formData.set("blogId", size);
+      formData.set("blogDescription", blogDescription);
 
       const res = await axios.post(`${apiBase}/blog/blog`,
         formData,
@@ -66,7 +69,8 @@ function AddBlog() {
 
         <div>
           <label>Description: </label>
-          <textarea {...register("blogDescription", { required: true })} />
+          <Editor value={blogDescription} onChange={setBlogDescription} apiBase={apiBase} />
+
         </div>
 
         <div>

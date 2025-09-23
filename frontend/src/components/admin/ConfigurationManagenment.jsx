@@ -1,66 +1,71 @@
 import axios from 'axios';
-import React from 'react'
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+
 function ConfigurationManagenment() {
     const [configuration, setConfiguration] = useState([]);
-  
-    const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-  
-    // react-hook-form
-    const {
-      register,
-      handleSubmit,
-      reset,
-      formState: { errors },
-    } = useForm();
-  
-    // fetch all configiurations
- useEffect(() => {
-  axios
-    .get(`${apiBase}/configuration/latest-configuration`,{withCredentials: true})
-    .then((res) => {
-      const data = res.data.payload || {};
-      console.log("data",data);
-      setConfiguration(data);
-      reset(data); // reset form with API response
-    })
-    .catch((err) => console.error(err));
-}, [handleSubmit, reset]);
+    const [headerPreview, setHeaderPreview] = useState(null);
+    const [footerPreview, setFooterPreview] = useState(null);
 
-  
-  const handleUpdate = async (data) => {
-    try {
-         const formData = new FormData();
-         Object.keys(data).forEach((key) => {
-            if (key === "headerLogo" && data.headerLogo && data.headerLogo[0]) {
-            formData.append("headerLogo", data.headerLogo[0]); // file
+    const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+    const { register, handleSubmit, reset, formState: { errors } } = useForm();
+
+    useEffect(() => {
+        axios.get(`${apiBase}/configuration/latest-configuration`, { withCredentials: true })
+            .then((res) => {
+                const data = res.data.payload || {};
+                setConfiguration(data);
+                reset(data);
+
+                // Show existing images if available
+                if (data.headerLogo) setHeaderPreview(null);
+                if (data.footerLogo) setFooterPreview(null);
+            })
+            .catch((err) => console.error(err));
+    }, [reset]);
+
+    // handle file preview
+    const handleFilePreview = (e, setPreview) => {
+        const file = e.target.files[0];
+        if (file) setPreview(URL.createObjectURL(file));
+    };
+
+    const handleUpdate = async (data) => {
+        try {
+            const formData = new FormData();
+            Object.keys(data).forEach((key) => {
+                if (key === "headerLogo" && data.headerLogo && data.headerLogo[0]) {
+                    formData.append("headerLogo", data.headerLogo[0]);
+                } else if (key === "footerLogo" && data.footerLogo && data.footerLogo[0]) {
+                    formData.append("footerLogo", data.footerLogo[0]);
+                } else {
+                    formData.append(key, data[key]);
+                }
+            });
+
+            const res = await axios.put(
+                `${apiBase}/configuration/configuration/${configuration.configId}`,
+                formData,
+                { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
+            );
+
+            if (res.status === 200) {
+                alert("Configuration updated successfully!");
+                const refreshed = await axios.get(`${apiBase}/configuration/latest-configuration`, { withCredentials: true });
+                const updatedData = refreshed.data.payload || {};
+                setConfiguration(updatedData);
+                reset(updatedData);
+
+                if (updatedData.headerLogo) setHeaderPreview(`${apiBase}/${updatedData.headerLogo}`);
+                if (updatedData.footerLogo) setFooterPreview(`${apiBase}/${updatedData.footerLogo}`);
             }
-            else if (key === "footerLogo" && data.footerLogo && data.footerLogo[0]) {
-            formData.append("footerLogo", data.footerLogo[0]); // file
-            }  else {
-            formData.append(key, data[key]);
-            }
-        });
-        const res=await axios.put(`${apiBase}/configuration/configuration/${configuration.configId}`,
-                 formData,
-        {withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
-        );
-        if (res.status === 200) {
-        alert("Configuration updated successfully!");
-        const refreshed = await axios.get(`${apiBase}/configuration/latest-configuration`,{withCredentials: true});
-        const updatedData = refreshed.data.payload || {};
-        setConfiguration(updatedData);
-        reset(updatedData);
-    }
-      
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update configuration");
-    }
-  };
-  
-  
+        } catch (err) {
+            console.error(err);
+            alert("Failed to update configuration");
+        }
+    };
+
     return (
       <div>
             <h2>Edit configuration (ID: {configuration.configId})</h2>
@@ -75,15 +80,49 @@ function ConfigurationManagenment() {
             <input type="text" {...register("homePageTitle", { required: true })} />
         </div>
 
-        <div>
-            <label>Header Logo: </label>
-            <input type="file" {...register("headerLogo")} />
-        </div>
+        {/* Header Logo with preview */}
+<div>
+  <label>Header Logo: </label>
+  {/* Existing header logo preview */}
+  {configuration.headerLogo && !headerPreview && (
+    <img
+      src={`${apiBase}${configuration.headerLogo}`}
+      alt="Current Header Logo"
+      style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+    />
+  )}
+  {/* New header logo preview */}
+  {headerPreview && (
+    <img
+      src={headerPreview}
+      alt="New Header Logo Preview"
+      style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+    />
+  )}
+  <input type="file" {...register("headerLogo")} onChange={(e) => handleFilePreview(e, setNewHeaderPreview)} />
+</div>
 
-        <div>
-            <label>Footer Logo: </label>
-            <input type="file" {...register("footerLogo")} />
-        </div>
+{/* Footer Logo with preview */}
+<div>
+  <label>Footer Logo: </label>
+  {/* Existing footer logo preview */}
+  {configuration.footerLogo && !footerPreview && (
+    <img
+      src={`${apiBase}${configuration.footerLogo}`}
+      alt="Current Footer Logo"
+      style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+    />
+  )}
+  {/* New footer logo preview */}
+  {footerPreview && (
+    <img
+      src={footerPreview}
+      alt="New Footer Logo Preview"
+      style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
+    />
+  )}
+  <input type="file" {...register("footerLogo")} onChange={(e) => handleFilePreview(e, setNewFooterPreview)} />
+</div>
 
         <div>
             <label>Banner Caption Name: </label>

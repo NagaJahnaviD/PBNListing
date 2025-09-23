@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Editor from "./Editor"
+import { useRef } from 'react';
 
 function AddBanner() {
+  const quillRef = useRef();
+  const [bannerContent, setBannerContent] = useState("");
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
   const location = useLocation();
   const navigate = useNavigate();
@@ -29,6 +33,7 @@ function AddBanner() {
       });
 
       formData.set("bannerId", size);
+      formData.set("bannerContent", bannerContent);
 
       const res = await axios.post(
         `${apiBase}/banner/banner`,
@@ -59,8 +64,9 @@ function AddBanner() {
         </div>
 
         <div>
-          <label>Content: </label>
-          <textarea {...register("bannerContent", { required: true })} />
+          <label>Content:</label>
+          <Editor value={bannerContent} onChange={setBannerContent} apiBase={apiBase} />
+
         </div>
 
         <div>
