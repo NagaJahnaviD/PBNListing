@@ -43,6 +43,9 @@ function AdminHeader() {
                 <Link to="block-list" className="dropdown-item">
                   Blocks
                 </Link>
+                <Link to="" className="dropdown-item">
+                  Pages
+                </Link>
               </li>
               <li>
                 <Link to="testimonial-list" className="dropdown-item">

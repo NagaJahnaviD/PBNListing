@@ -10,9 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@minoru/react-dnd-treeview": "^3.5.3",
     "axios": "^1.11.0",
     "bootstrap": "^5.3.8",
     "react": "^18.3.1",
+    "react-dnd": "^16.0.1",
+    "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^18.3.1",
     "react-form-hook": "^0.0.1",
     "react-hook-form": "^7.62.0",

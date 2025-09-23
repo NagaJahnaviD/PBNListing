@@ -21,6 +21,7 @@ import AddClient from './components/admin/AddClient'
 import AddBanner from './components/admin/AddBanner'
 import BannerManagement from './components/admin/BannerManagement'
 import ClientManagement from './components/admin/ClientManagement'
+import MenuManagement from './components/admin/MenuManagement';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 const browserRouterObj = createBrowserRouter([
 
@@ -53,6 +54,10 @@ const browserRouterObj = createBrowserRouter([
       {
         path: "add-page",
         element: <AddPage />,
+      },
+      {
+        path: "menu",
+        element: <MenuManagement />,
       },
       {
         path: "block-list",

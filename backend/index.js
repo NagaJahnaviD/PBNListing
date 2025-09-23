@@ -53,6 +53,9 @@ app.use("/testimonial",testimonialApp)
 const configurationApp=require("./APIs/configurationApi")
 app.use("/configuration",configurationApp)
 
+//menu api
+const menuApp=require("./APIs/menuApi")
+app.use("/menu",menuApp)
 
 // Serve files inside the /uploads folder at the /uploads URL path
 app.use("/uploads", exp.static(path.join(__dirname, "uploads")));
