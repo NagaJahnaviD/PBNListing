@@ -16,6 +16,10 @@ menuApp.get('/menus',adminAuth, expressAsyncHandler(async (req, res) => {
     const menus = await Menu.find();
     res.status(200).send({ message: 'Menus list', payload: menus });
 }));
+menuApp.get('/users/menus', expressAsyncHandler(async (req, res) => { 
+    const menus = await Menu.find();
+    res.status(200).send({ message: 'Menus list', payload: menus });
+}));
 // Get a single menu by menuId
 menuApp.get('/menu/:menuId',adminAuth, expressAsyncHandler(async (req, res) => {
     const menu = await Menu.findOne({ menuId: req.params.menuId });
