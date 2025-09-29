@@ -36,7 +36,7 @@ function AddBanner() {
       formData.set("bannerContent", bannerContent);
 
       const res = await axios.post(
-        `${apiBase}/banner/banner`,
+        `${apiBase}/banner`,
         formData,
         { withCredentials: true, headers: { "Content-Type": "multipart/form-data" } }
       );

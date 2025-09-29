@@ -7,7 +7,7 @@ const expressAsyncHandler = require("express-async-handler");
 
 // Create a new banner
 bannerApp.post(
-  "/banner",
+  "/",
   adminAuth,
   upload.single("bannerImage"),
   expressAsyncHandler(async (req, res) => {
@@ -37,7 +37,7 @@ bannerApp.post(
 
 // Get all banners
 bannerApp.get(
-  "/banners",
+  "/admin/banners",
   adminAuth,
   expressAsyncHandler(async (req, res) => {
     const banners = await Banner.find();
@@ -45,9 +45,16 @@ bannerApp.get(
   })
 );
 
+bannerApp.get(
+  "/banners",
+  expressAsyncHandler(async (req, res) => {
+    const banners = await Banner.find();
+    res.status(200).send({ message: "Banners list", payload: banners });
+  })
+);
 // Get a single banner by bannerId
 bannerApp.get(
-  "/banner/:bannerId",
+  "/:bannerId",
   adminAuth,
   expressAsyncHandler(async (req, res) => {
     const banner = await Banner.findOne({ bannerId: req.params.bannerId });
@@ -60,7 +67,7 @@ bannerApp.get(
 
 // Edit a banner by bannerId
 bannerApp.put(
-  "/banner/:bannerId",
+  "/:bannerId",
   adminAuth,
   upload.single("bannerImage"),
   expressAsyncHandler(async (req, res) => {
@@ -94,7 +101,7 @@ bannerApp.put(
 
 // Delete a banner by bannerId
 bannerApp.delete(
-  "/banner/:bannerId",
+  "/:bannerId",
   adminAuth,
   expressAsyncHandler(async (req, res) => {
     const deletedBanner = await Banner.findOneAndDelete({

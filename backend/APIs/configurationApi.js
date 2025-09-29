@@ -63,4 +63,20 @@ configurationApp.get(
   })
 );
 
+// routes/configurationApp.js
+configurationApp.get(
+  '/latest-public',
+  expressAsyncHandler(async (req, res) => {
+    const latestConfiguration = await Configuration.findOne().sort({ createdOn: -1 });
+    if (!latestConfiguration)
+      return res.status(404).send({ message: 'No configuration found' });
+
+    res.status(200).send({
+      message: 'Latest configuration',
+      payload: latestConfiguration
+    });
+  })
+);
+
+
 module.exports = configurationApp;

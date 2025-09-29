@@ -1,7 +1,7 @@
 import React from 'react'
 import AdminHeader from './AdminHeader'
 import { Outlet } from 'react-router-dom'
-
+import Footer from '../common/Footer'
 // Make sure to install and import Bootstrap in your project's entry file (e.g., index.js or App.js)
 // npm install bootstrap
 // import 'bootstrap/dist/css/bootstrap.min.css';
@@ -14,6 +14,7 @@ function AdminLayout() {
         <div className="container-fluid flex-grow-1 p-4 w-50">
           <Outlet />
         </div>
+        <Footer/>
     </div>
   )
 }

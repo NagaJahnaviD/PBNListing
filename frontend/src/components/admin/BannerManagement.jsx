@@ -19,7 +19,7 @@ function BannerManagement() {
   // Fetch all banners
   useEffect(() => {
     axios
-      .get(`${apiBase}/banner/banners`, { withCredentials: true })
+      .get(`${apiBase}/banner/admin/banners`, { withCredentials: true })
       .then((res) => setBanners(res.data.payload || []))
       .catch((err) => console.error(err));
   }, [apiBase]);
@@ -44,46 +44,66 @@ function BannerManagement() {
   };
 
   // Save updates
-  const handleUpdate = async (data) => {
-    try {
-      const formData = new FormData();
+const handleUpdate = async (data) => {
+  try {
+    const formData = new FormData();
 
-      Object.keys(data).forEach((key) => {
-        if (key === "bannerImage" && data.bannerImage?.length > 0) {
-          formData.append("bannerImage", data.bannerImage[0]);
-        } else if (data[key] !== "" && data[key] !== null && data[key] !== undefined) {
-          formData.append(key, data[key]);
-        }
-      });
-
-      formData.set("bannerContent", bannerContent); // ✅ include editor content
-
-      const res = await axios.put(
-        `${apiBase}/banner/banner/${editBannerId}`,
-        formData,
-        {
-          withCredentials: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-
-      if (res.status === 200) {
-        alert("Banner updated successfully!");
-        const refreshed = await axios.get(`${apiBase}/banner/banners`, { withCredentials: true });
-        setBanners(refreshed.data.payload || []);
-
-        // reset editor & form
-        setEditBanner(false);
-        setEditBannerId(null);
-        setNewImagePreview(null);
-        setBannerContent("");
-        reset({});
+    // Handle all fields except bannerImage
+    Object.keys(data).forEach((key) => {
+      if (key !== "bannerImage" && data[key] !== "" && data[key] !== null && data[key] !== undefined) {
+        formData.append(key, data[key]);
       }
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update banner");
+    });
+
+    // Handle bannerImage
+    const fileInput = data.bannerImage?.[0]; // first file if any
+
+    if (fileInput instanceof File) {
+      // New image selected
+      console.log("New image uploaded:", fileInput);
+      formData.append("bannerImage", fileInput);
+    } else {
+      // No new image, retain existing
+      const currentBanner = banners.find((b) => b.bannerId === editBannerId);
+      if (currentBanner?.bannerImage) {
+        formData.append("bannerImage", currentBanner.bannerImage);
+        console.log("Retaining existing image:", currentBanner.bannerImage);
+      }
     }
-  };
+
+    // Include editor content
+    formData.set("bannerContent", bannerContent);
+
+    // Make API request
+    const res = await axios.put(
+      `${apiBase}/banner/${editBannerId}`,
+      formData,
+      {
+        withCredentials: true,
+        headers: { "Content-Type": "multipart/form-data" },
+      }
+    );
+
+    if (res.status === 200) {
+      alert("Banner updated successfully!");
+
+      // Refresh banners list
+      const refreshed = await axios.get(`${apiBase}/banner/banners`, { withCredentials: true });
+      setBanners(refreshed.data.payload || []);
+
+      // Reset form & editor
+      setEditBanner(false);
+      setEditBannerId(null);
+      setNewImagePreview(null);
+      setBannerContent("");
+      reset({});
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Failed to update banner");
+  }
+};
+
 
   return (
     <div>

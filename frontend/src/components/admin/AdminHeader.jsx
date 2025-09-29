@@ -67,6 +67,11 @@ function AdminHeader() {
                   Banners
                 </Link>
               </li>
+              <li>
+                <Link to="menu" className="dropdown-item">
+                  Menus
+                </Link>
+              </li>
             </ul>
           </li>
 
