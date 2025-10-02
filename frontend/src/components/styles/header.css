@@ -96,6 +96,11 @@
   padding-left: 16px;
   margin: 0;
 }
+.header-logo {
+  max-height: 50px;
+  width: auto;
+  display: block;
+}
 
 /* ====== Responsive Breakpoints ====== */
 @media (min-width: 768px) {

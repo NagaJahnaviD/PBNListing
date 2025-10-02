@@ -25,7 +25,7 @@ function Footer() {
         {/* Left: Logo & About */}
         <div className="footer-section">
           <img
-            src={config.footerLogo}
+            src={`${apiBase}${config.footerLogo}`}
             alt={config.websiteTitle}
             className="footer-logo"
           />

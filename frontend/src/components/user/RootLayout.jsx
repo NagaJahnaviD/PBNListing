@@ -7,8 +7,8 @@ function RootLayout() {
   return (
     <div className="d-flex flex-column min-vh-100">
         <UserHeader/>
-        <BannerCarouel/>
-        <div className="container-fluid flex-grow-1 p-4 w-50">
+  
+        <div >
           <Outlet />
         </div>
         <Footer/>

@@ -136,7 +136,7 @@ body {
 /* =========================================================
    Images & Media
    ========================================================= */
-.img-responsive { max-width: 100%; height: auto; border-radius: var(--radius-sm); }
+.img-responsive { max-width: 100%; height: auto;  }
 .avatar         { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; }
 
 /* =========================================================

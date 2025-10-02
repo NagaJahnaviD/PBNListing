@@ -1,6 +1,9 @@
+// src/components/UserHeader.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import "../styles/header.css";
+
+/* ---------- Build Nested Menu Tree ---------- */
 function buildMenuTree(items) {
   const lookup = {};
   const roots = [];
@@ -21,7 +24,7 @@ function buildMenuTree(items) {
   return roots;
 }
 
-/* Desktop Node */
+/* ---------- Desktop Menu Node ---------- */
 function DesktopMenuNode({ node }) {
   return (
     <li className="menu-item">
@@ -43,7 +46,7 @@ function DesktopMenuNode({ node }) {
   );
 }
 
-/* Mobile Node */
+/* ---------- Mobile Menu Node ---------- */
 function MobileMenuNode({ node }) {
   const [open, setOpen] = useState(false);
   return (
@@ -77,12 +80,15 @@ function MobileMenuNode({ node }) {
   );
 }
 
+/* ---------- Main Header Component ---------- */
 export default function UserHeader() {
   const [menuTree, setMenuTree] = useState([]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [config, setConfig] = useState(null);           // configuration
   const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
   useEffect(() => {
+    // fetch menus
     const fetchMenus = async () => {
       try {
         const res = await axios.get(`${apiBase}/menu/users/menus`, {
@@ -90,18 +96,49 @@ export default function UserHeader() {
         });
         setMenuTree(buildMenuTree(res.data.payload || []));
       } catch (err) {
-        console.error(err);
+        console.error("Menu fetch error:", err);
       }
     };
+
+    // fetch site configuration for header image/title
+    const fetchConfig = async () => {
+      try {
+        const res = await axios.get(`${apiBase}/configuration/latest-public`);
+        setConfig(res.data.payload);
+        console.log("Header config:", res.data.payload);
+
+      } catch (err) {
+        console.error("Header config error:", err);
+      }
+    };
+
     fetchMenus();
+    fetchConfig();
   }, [apiBase]);
 
   return (
     <header className="site-header">
       <div className="header-inner">
-        <div className="logo">My Website</div>
+        {/* -------- Logo / Title from configuration -------- */}
+        <div className="logo">
+          {config ? (
+            <a href="/">
+              {config.headerLogo ? (
+                <img
+                  src={`${apiBase}${config.headerLogo}`}
+                  alt={config.websiteTitle || "Site Logo"}
+                  className="header-logo"
+                />
+              ) : (
+                config.websiteTitle || "My Website"
+              )}
+            </a>
+          ) : (
+            "My Website"
+          )}
+        </div>
 
-        {/* Desktop Menu */}
+        {/* -------- Desktop Menu -------- */}
         <nav className="desktop-menu">
           <ul className="menu-list">
             {menuTree.map(node => (
@@ -110,7 +147,7 @@ export default function UserHeader() {
           </ul>
         </nav>
 
-        {/* Mobile Toggle */}
+        {/* -------- Mobile Toggle -------- */}
         <button
           className="hamburger"
           onClick={() => setMobileOpen(!mobileOpen)}
@@ -120,7 +157,7 @@ export default function UserHeader() {
         </button>
       </div>
 
-      {/* Mobile Menu */}
+      {/* -------- Mobile Menu -------- */}
       {mobileOpen && (
         <nav className="mobile-menu">
           <ul className="mobile-list">

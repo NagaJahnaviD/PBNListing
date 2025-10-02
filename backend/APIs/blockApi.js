@@ -45,6 +45,14 @@ blockApp.get(
   })
 );
 
+blockApp.get(
+  '/',
+  expressAsyncHandler(async (req, res) => {
+    const blocks = await Block.find();
+    res.status(200).send({ message: 'Blocks list', payload: blocks });
+  })
+);
+
 // Edit a block by blockId
 blockApp.put(
   '/block/:blockId',

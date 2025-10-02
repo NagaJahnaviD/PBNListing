@@ -8,11 +8,9 @@ const blockSchema=new mongoose.Schema({
     },
     blockTitle:{
         type:String,
-        required:true
     },
     blockSubtitle:{
         type:String,
-        required:true
     },
     blockVisibility:{ 
         type: Boolean,
