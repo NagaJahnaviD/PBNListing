@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import ReactQuill from "react-quill";
+import Editor from "./Editor";
 import "react-quill/dist/quill.snow.css";
 
 function Index() {
@@ -173,20 +173,29 @@ function Index() {
             {/* Rich Text Editors */}
             <div>
               <label>Content: </label>
-              <ReactQuill theme="snow" value={contentValue} onChange={setContentValue}
-                style={{ height: "200px", marginBottom: "40px" }} />
-            </div>
+              <Editor
+                value={contentValue}
+                onChange={setContentValue}
+                apiBase={apiBase}
+              />
+           </div>
 
             <div className="pt-5">
               <label>Page Top Content: </label>
-              <ReactQuill theme="snow" value={topContentValue} onChange={setTopContentValue}
-                style={{ height: "200px", marginBottom: "40px" }} />
-            </div>
+              <Editor
+                value={topContentValue}
+                onChange={setTopContentValue}
+                apiBase={apiBase}
+              />
+              </div>
 
             <div className="pt-5">
               <label>Page Bottom Content: </label>
-              <ReactQuill theme="snow" value={bottomContentValue} onChange={setBottomContentValue}
-                style={{ height: "200px", marginBottom: "40px" }} />
+              <Editor
+                value={bottomContentValue}
+                onChange={setBottomContentValue}
+                apiBase={apiBase}
+              />
             </div>
 
             <div className="pt-5">
@@ -235,12 +244,9 @@ function Index() {
             </div>
 
             <div>
-              <label>Send Email: </label>
-              <select {...register("sendEmail")}>
-                <option value="false">No</option>
-                <option value="true">Yes</option>
-              </select>
-            </div>
+          <label>Send Email: </label>
+          <input type="text" {...register("sendEmail", )} />
+        </div>
 
             <div>
               <label>Provided Menu Link: </label>

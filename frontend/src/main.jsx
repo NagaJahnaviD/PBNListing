@@ -24,6 +24,7 @@ import ClientManagement from './components/admin/ClientManagement'
 import MenuManagement from './components/admin/MenuManagement';
 import UserHeader from './components/user/UserHeader';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import PageView from './components/user/PageView'
 const browserRouterObj = createBrowserRouter([
 
   {
@@ -34,6 +35,8 @@ const browserRouterObj = createBrowserRouter([
         path: "",
         element: <Home />,
       },
+      { path: ":pageUrl",
+        element: <PageView /> },
     ],
   },
   {

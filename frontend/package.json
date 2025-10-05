@@ -10,11 +10,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-build-classic": "^41.4.2",
+    "@ckeditor/ckeditor5-font": "^47.0.0",
+    "@ckeditor/ckeditor5-react": "^11.0.0",
+    "@ckeditor/ckeditor5-source-editing": "^47.0.0",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@minoru/react-dnd-treeview": "^3.5.3",
     "axios": "^1.12.2",
     "bootstrap": "^5.3.8",
+    "quill-html-edit-button": "^3.0.0",
     "react": "^18.3.1",
     "react-bootstrap": "^2.10.10",
     "react-dnd": "^16.0.1",

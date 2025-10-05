@@ -131,12 +131,8 @@ function AddPage() {
 
         <div>
           <label>Send Email: </label>
-          <select {...register("sendEmail")}>
-            <option value="false">No</option>
-            <option value="true">Yes</option>
-          </select>
+          <input type="text" {...register("sendEmail", )} />
         </div>
-
         <div>
           <label>Provided Menu Link: </label>
           <input type="text" {...register("providedMenuLink", { required: true })} />

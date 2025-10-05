@@ -99,7 +99,7 @@ function ConfigurationManagenment() {
       style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
     />
   )}
-  <input type="file" {...register("headerLogo")} onChange={(e) => handleFilePreview(e, setNewHeaderPreview)} />
+  <input type="file" {...register("headerLogo")} onChange={(e) => handleFilePreview(e, setHeaderPreview)} />
 </div>
 
 {/* Footer Logo with preview */}
@@ -121,7 +121,7 @@ function ConfigurationManagenment() {
       style={{ maxWidth: "200px", display: "block", marginBottom: "10px" }}
     />
   )}
-  <input type="file" {...register("footerLogo")} onChange={(e) => handleFilePreview(e, setNewFooterPreview)} />
+  <input type="file" {...register("footerLogo")} onChange={(e) => handleFilePreview(e, setFooterPreview)} />
 </div>
 
         <div>

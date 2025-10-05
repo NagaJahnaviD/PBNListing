@@ -94,5 +94,26 @@ pageApp.get(
     res.status(200).send({ message: "Pages list", payload: pages });
   })
 );
+pageApp.get(
+  "/pages",
+  expressAsyncHandler(async (req, res) => {
+    const pages = await Page.find();
+    res.status(200).send({ message: "Pages list", payload: pages });
+  })
+);
+// -----------------------------
+// Get a single page by pageUrl
+// -----------------------------
+pageApp.get(
+  "/pages/:pageUrl",
+  expressAsyncHandler(async (req, res) => {
+    const page = await Page.findOne({ pageUrl: req.params.pageUrl, publishStatus: true });
+    if (!page) {
+      return res.status(404).send({ message: "Page not found" });
+    }
+    res.status(200).send({ message: "Page details", payload: page });
+  })
+);
+
 
 module.exports = pageApp;

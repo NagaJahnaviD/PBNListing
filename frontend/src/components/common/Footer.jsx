@@ -63,7 +63,7 @@ function Footer() {
       .split(",")                     // turn "Home,About,FAQ" into ["Home","About","FAQ"]
       .map((link, i, arr) => (
         <React.Fragment key={i}>
-          <a href={`/${link.trim()}`}>{link.trim()}</a><br/>
+          <a href={`/${link.trim().toLowerCase()}`}>{link.trim()}</a><br/>
         </React.Fragment>
       ))}
   </p>

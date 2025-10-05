@@ -1,11 +1,13 @@
-import React from "react";
+// components/AdminHeader.jsx
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-function AdminHeader() {
+export default function AdminHeader() {
   const navigate = useNavigate();
-  const apiBase =
-    import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+  const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   const handleLogout = async () => {
     try {
@@ -19,31 +21,34 @@ function AdminHeader() {
   };
 
   return (
-    <div>
-      <nav className="header d-flex justify-content-between align-items-center p-2 bg-light shadow-sm">
-        <div>
-          <Link to="/admin" className="fw-bold text-decoration-none">
-            LOGO
-          </Link>
-        </div>
+    <nav className="header d-flex justify-content-between align-items-center p-2 bg-light shadow-sm">
+      {/* Logo */}
+      <div>
+        <Link to="/admin" className="fw-bold text-decoration-none">
+          LOGO
+        </Link>
+      </div>
 
-        <ul className="d-flex align-items-center list-unstyled m-0">
-          {/* Content Management Dropdown */}
-          <li className="nav-item dropdown me-3">
-            <button
-              className="btn btn-outline-primary dropdown-toggle"
-              id="contentDropdown"
-              data-bs-toggle="dropdown"
-              aria-expanded="false"
+      {/* Navigation */}
+      <ul className="d-flex align-items-center list-unstyled m-0">
+        {/* Content Management Dropdown */}
+        <li className="nav-item me-3 position-relative">
+          <button
+            className="btn btn-outline-primary"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+          >
+            Content Management
+          </button>
+          {dropdownOpen && (
+            <ul
+              className="dropdown-menu show position-absolute"
+              style={{ top: "100%", left: 0 }}
             >
-              Content Management
-            </button>
-            <ul className="dropdown-menu" aria-labelledby="contentDropdown">
               <li>
                 <Link to="block-list" className="dropdown-item">
                   Blocks
                 </Link>
-                <Link to="" className="dropdown-item">
+                <Link to="/admin" className="dropdown-item">
                   Pages
                 </Link>
               </li>
@@ -73,33 +78,28 @@ function AdminHeader() {
                 </Link>
               </li>
             </ul>
-          </li>
+          )}
+        </li>
 
-          {/* Other Links */}
-          <li className="me-3">
-            <Link to="configuration" className="btn btn-outline-secondary">
-              Configuration
-            </Link>
-          </li>
-          <li className="me-3">
-            <Link to="change-password" className="btn btn-outline-secondary">
-              Change Password
-            </Link>
-          </li>
+        {/* Other Links */}
+        <li className="me-3">
+          <Link to="configuration" className="btn btn-outline-secondary">
+            Configuration
+          </Link>
+        </li>
+        <li className="me-3">
+          <Link to="change-password" className="btn btn-outline-secondary">
+            Change Password
+          </Link>
+        </li>
 
-          {/* Logout */}
-          <li>
-            <button
-              onClick={handleLogout}
-              className="btn btn-danger"
-            >
-              Logout
-            </button>
-          </li>
-        </ul>
-      </nav>
-    </div>
+        {/* Logout */}
+        <li>
+          <button onClick={handleLogout} className="btn btn-danger">
+            Logout
+          </button>
+        </li>
+      </ul>
+    </nav>
   );
 }
-
-export default AdminHeader;
